@@ -20,9 +20,42 @@ class Modeling
     relative_error
   end
 
+  # @people_num人に意見を聞いて多数決を行い意見集約を行う
+  # 簡単のため、@people_numは奇数とする
+  def baseline_method2(possibility_correct)
+    # 半数の人数を求める
+    half_num = (@people_num.to_f / 2).ceil
+    # 誤差率を求める
+    relative_error = 0
+    half_num.times do |t|
+      relative_error += (possibility_correct**t) * ((1 - possibility_correct)**(@people_num - t)) * combi(@people_num, t)
+    end
+    # 誤差率を返す
+    relative_error
+  end
+
   # 誤差率εを変動させて、必要な人数Xを求める
+  # 先に(@people_num / 2)の意見を集めた方を意見集約の結果とするアルゴリズム
+  def baseline_method3(relative_error)
+    # 必要な人数を求める 1,3,5,,,,と増やす
+    people_num = 1
+    # 半数の人数を求める
+    finish_num = (people_num.to_f / 2).ceil
+    # 徐々に人数を増やしていき、誤差率を満たす結果の場合ループを終了する
+    loop do
+      expected_error = 0
+      finish_num.times do |t|
+        expected_error += ((1 - @possibility_correct)**finish_num) * (@possibility_correct**t) * combi(finish_num - 1 + t, t)
+      end
+      break if expected_error <= relative_error
+      people_num += 2
+      finish_num = (people_num.to_f / 2).ceil
+    end
+  end
+
+
   # 多数決を意見集約のアルゴリズムとする
-  def baseline_method2(relative_error)
+  def baseline_method4(relative_error)
     # 必要な人数を求める 1,3,5,,,,と増やす
     people_num = 1
     # 半数の人数を求める
