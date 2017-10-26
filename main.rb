@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/Modeling'
 require 'rbplotly'
 
 PEOPELE_NUM = 199
-POSSIBILITY_CORRECT = 0.6
+POSSIBILITY_CORRECT = 0.7
 DELIMITER = 100
 
 model = Modeling.new(PEOPELE_NUM, POSSIBILITY_CORRECT)
