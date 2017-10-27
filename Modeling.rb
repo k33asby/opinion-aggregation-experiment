@@ -10,11 +10,12 @@ class Modeling
     (num.to_f / 2).ceil
   end
 
-  # 誤差率をもとめる.先に半分の意見(finish_num)を集めた方を意見集約の結果とするアルゴリズム
-  def relative_error_by_half_opinion(finish_num, possibility_correct) # possibility_correct => 人が正解する確率p
-    relative_error = 0
+  # 誤差率をもとめる.先にある割合の意見(finish_num)を集めた方を意見集約の結果とするアルゴリズム
+  # このアルゴリズムは必要な人数が動的に変化するので、誤差率をfinish_num個の要素にした配列で返す
+  def relative_error_array_by_half_opinion(finish_num, possibility_correct) # possibility_correct => 人が正解する確率p
+    relative_error = []
     finish_num.times do |t|
-      relative_error += ((1 - possibility_correct)**finish_num) * (possibility_correct**t) * combi(finish_num - 1 + t, t)
+      relative_error << ((1 - possibility_correct)**finish_num) * (possibility_correct**t) * combi(finish_num - 1 + t, t)
     end
     relative_error
   end
@@ -34,7 +35,7 @@ class Modeling
     # 終了する人数を求める
     finish_num = @people_half
     # 誤差率を求め、返す
-    relative_error_by_half_opinion(finish_num, possibility_correct)
+    relative_error_array_by_half_opinion(finish_num, possibility_correct).inject(:+)
   end
 
   # 確率pを変動させて、誤差率εの求める
@@ -49,15 +50,22 @@ class Modeling
     people_num = 1
     # 終了する人数を求める
     temp_finish_num = half_num(people_num)
+    # 必要な平均人数
+    average_num = 0
     # 徐々に人数を増やしていき、誤差率を満たす結果の場合ループを終了する
     loop do
-      expected_error = relative_error_by_half_opinion(temp_finish_num, @possibility_correct)
+      relative_error_array = relative_error_array_by_half_opinion(temp_finish_num, @possibility_correct)
+      expected_error = relative_error_array.inject(:+)
+      average_num = 0
+      relative_error_array.each_with_index do |e, i| # もっと簡単にかけそう
+        average_num += e * (i + temp_finish_num) / expected_error
+      end
       break if expected_error <= relative_error
       people_num += 2
       temp_finish_num = half_num(people_num)
     end
-    # 必要な人数を返す
-    people_num
+    # 必要な人数の平均を返す
+    average_num
   end
 
   # 多数決を意見集約のアルゴリズムとする

@@ -7,11 +7,6 @@ DELIMITER = 100
 
 model = Modeling.new(PEOPELE_NUM, POSSIBILITY_CORRECT)
 
-# 結果をコンソールに表示
-# DELIMITER.times do |t|
-#   puts model.baseline_method(t.to_f / DELIMITER)
-# end
-
 # 縦軸 => 誤差率ε, 横軸 => 人の正解する確率p
 error_possibility_x_axis = (DELIMITER/2..DELIMITER).to_a
 y_axis1 = error_possibility_x_axis.map{ |e| model.baseline_method1(e.to_f / DELIMITER) }
