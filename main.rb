@@ -7,6 +7,10 @@ DELIMITER = 100
 
 model = Modeling.new(PEOPELE_NUM, POSSIBILITY_CORRECT)
 
+p model.baseline_method_deciding_by_first_person_with_poisson(0.6)
+
+throw Exception
+
 # 縦軸 => 誤差率ε, 横軸 => 人の正解する確率p
 error_possibility_x_axis = (DELIMITER/2..DELIMITER).to_a
 y_axis1 = error_possibility_x_axis.map{ |e| model.baseline_method1(e.to_f / DELIMITER) }

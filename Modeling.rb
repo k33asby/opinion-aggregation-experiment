@@ -1,3 +1,5 @@
+require 'poisson'
+
 class Modeling
   def initialize(people_num, possibility_correct)
     @people_num = people_num
@@ -5,9 +7,52 @@ class Modeling
     @possibility_correct = possibility_correct
   end
 
-  # 半分の値を求める
+  # ポアソン分布のテスト
+  def test_random
+    poisson = Poisson.new(50) # 平均50のポアソン分布
+    sum = 0
+    40.times do |t|
+     sum += poisson.probability{ |x| x == t + 30 }
+    end
+    p sum
+  end
+
+  # 一人目の意見を採用するという雑魚アルゴリズム
+  # TODO 時刻0から99で行なっているが1から100の方が好ましい気がする
+  def baseline_method_deciding_by_first_person_with_poisson(possibility_correct)
+    collecting_deadline = 100 # 意見収集の締め切り 99時刻
+    poisson = Poisson.new(50) # 平均50人のポアソン分布
+    average_method_utility = 0
+    # 0~ 99人来るときのみを考慮する(それ以外は0に近似する)
+    100.times do |t_people|
+      # t_people人来るとき
+      when_people_come = Array.new(collecting_deadline) # 人がいつ来るか配列で表す
+      temp_probability_by_poisson = poisson.probability{ |x| x == t_people }
+      t_people.times do |t|
+        when_people_come[t] = 1
+      end
+      method_utility = 0 # 効用 = 精度(正解率) - かかる時間(決定する時刻 / collecting_deadline)
+      when_people_come.shuffle.each_with_index do |elem, index|
+        next if elem.nil?
+        weight = 5.to_f / collecting_deadline
+        method_utility += possibility_correct - index.to_f * weight
+        break
+      end
+      average_method_utility += temp_probability_by_poisson * method_utility
+      puts "temp_probability_by_poisson: " + temp_probability_by_poisson.to_s + "       method_utility: " + method_utility.to_s
+    end
+    average_method_utility
+  end
+
   def half_num(num)
     (num.to_f / 2).ceil
+  end
+
+  # nCk 実行例 5C2 = 5 * 4 / 2! = 10
+  def combi(n, k)
+    k = n - k if 2 * k > n
+    return 1 if k == 0
+    ((n - k + 1)..n).reduce(&:*) / (1..k).reduce(&:*)
   end
 
   # 誤差率をもとめる.先にある割合の意見(finish_num)を集めた方を意見集約の結果とするアルゴリズム
@@ -80,12 +125,5 @@ class Modeling
     end
     # 必要な人数を返す
     people_num
-  end
-
-  # コンビネーションの計算
-  def combi(n, k)
-    k = n - k if 2 * k > n
-    return 1 if k == 0
-    ((n - k + 1)..n).reduce(&:*) / (1..k).reduce(&:*)
   end
 end
