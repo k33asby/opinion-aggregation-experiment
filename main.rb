@@ -7,18 +7,45 @@ DELIMITER = 100
 
 model = Modeling.new(PEOPELE_NUM, POSSIBILITY_CORRECT)
 
-# p model.baseline_method_deciding_by_majority_vote_with_poisson
+p model.baseline_method_deciding_by_time_limit_with_poisson(0.7)
+
+exit
 
 # 縦軸 => 効用utility, 横軸 => 人の正解する確率p
 utility_possibility_x_axis = (DELIMITER / 2..DELIMITER).to_a
-utility_possibility_by_first_person_traces_arr = []
+# 乱数を用いてるので10回分の平均をとる
+temp_utility_possibility_y_axis_by_first_person = []
+temp_utility_possibility_y_axis_by_majority_vote = []
+temp_utility_possibility_y_axis_by_time_limit = []
 10.times do
-  utility_possibility_by_first_person_traces_arr << { x: utility_possibility_x_axis, y: utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_first_person_with_poisson(e.to_f / DELIMITER) } }
+  temp_utility_possibility_y_axis_by_first_person << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_first_person_with_poisson(e.to_f / DELIMITER) }
+  temp_utility_possibility_y_axis_by_majority_vote << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_majority_vote_with_poisson(e.to_f / DELIMITER) }
+  temp_utility_possibility_y_axis_by_time_limit << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_time_limit_with_poisson(e.to_f / DELIMITER) }
 end
-pl_by_first_person = Plotly::Plot.new(data: utility_possibility_by_first_person_traces_arr)
-pl_by_first_person.layout.xaxis = { title: 'possibility_correct' }
-pl_by_first_person.layout.yaxis = { title: 'utility' }
-pl_by_first_person.show
+utility_possibility_y_axis_by_first_person = []
+utility_possibility_y_axis_by_majority_vote = []
+utility_possibility_y_axis_by_time_limit = []
+utility_possibility_x_axis.length.times do |x_axis|
+  average_y_first_person = 0
+  average_y_majority_vote = 0
+  average_y_time_limit = 0
+  10.times do |t|
+    average_y_first_person +=  temp_utility_possibility_y_axis_by_first_person[t][x_axis] / 10
+    average_y_majority_vote +=  temp_utility_possibility_y_axis_by_majority_vote[t][x_axis] / 10
+    average_y_time_limit +=  temp_utility_possibility_y_axis_by_time_limit[t][x_axis] / 10
+  end
+  utility_possibility_y_axis_by_first_person << average_y_first_person
+  utility_possibility_y_axis_by_majority_vote << average_y_majority_vote
+  utility_possibility_y_axis_by_time_limit << average_y_time_limit
+end
+utility_possibility_by_first_person_trace = [ {x: utility_possibility_x_axis, y: utility_possibility_y_axis_by_first_person}]
+utility_possibility_by_majority_vote_trace = [ {x: utility_possibility_x_axis, y: utility_possibility_y_axis_by_majority_vote}]
+utility_possibility_by_time_limit_trace = [ {x: utility_possibility_x_axis, y: utility_possibility_y_axis_by_half_opinion}]
+
+pl = Plotly::Plot.new(data: utility_possibility_by_first_person_trace + utility_possibility_by_majority_vote_trace + utility_possibility_by_time_limit_trace)
+pl.layout.xaxis = { title: 'possibility_correct' }
+pl.layout.yaxis = { title: 'utility' }
+pl.show
 
 utility_possibility_by_majority_vote_traces_arr = []
 10.times do
@@ -29,8 +56,6 @@ pl_by_majority_vote.layout.xaxis = { title: 'possibility_correct' }
 pl_by_majority_vote.layout.yaxis = { title: 'utility' }
 pl_by_majority_vote.show
 
-
-throw Exception
 
 # 縦軸 => 誤差率ε, 横軸 => 人の正解する確率p
 error_possibility_x_axis = (DELIMITER / 2..DELIMITER).to_a
