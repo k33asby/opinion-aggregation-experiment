@@ -3,13 +3,10 @@ require 'rbplotly'
 
 PEOPELE_NUM = 199
 POSSIBILITY_CORRECT = 0.7
+LAMBDA_POISSON = 30
 DELIMITER = 100
 
-model = Modeling.new(PEOPELE_NUM, POSSIBILITY_CORRECT)
-
-p model.baseline_method_deciding_by_time_limit_with_poisson(0.7)
-
-exit
+model = Modeling.new(PEOPELE_NUM, POSSIBILITY_CORRECT, LAMBDA_POISSON)
 
 # 縦軸 => 効用utility, 横軸 => 人の正解する確率p
 utility_possibility_x_axis = (DELIMITER / 2..DELIMITER).to_a
@@ -19,8 +16,8 @@ temp_utility_possibility_y_axis_by_majority_vote = []
 temp_utility_possibility_y_axis_by_time_limit = []
 10.times do
   temp_utility_possibility_y_axis_by_first_person << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_first_person_with_poisson(e.to_f / DELIMITER) }
-  temp_utility_possibility_y_axis_by_majority_vote << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_majority_vote_with_poisson(e.to_f / DELIMITER) }
-  temp_utility_possibility_y_axis_by_time_limit << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_time_limit_with_poisson(e.to_f / DELIMITER) }
+  temp_utility_possibility_y_axis_by_majority_vote << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_majority_vote_with_poisson(e.to_f / DELIMITER, 5) }
+  temp_utility_possibility_y_axis_by_time_limit << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_time_limit_with_poisson(e.to_f / DELIMITER, 10) }
 end
 utility_possibility_y_axis_by_first_person = []
 utility_possibility_y_axis_by_majority_vote = []
@@ -40,7 +37,7 @@ utility_possibility_x_axis.length.times do |x_axis|
 end
 utility_possibility_by_first_person_trace = [ {x: utility_possibility_x_axis, y: utility_possibility_y_axis_by_first_person}]
 utility_possibility_by_majority_vote_trace = [ {x: utility_possibility_x_axis, y: utility_possibility_y_axis_by_majority_vote}]
-utility_possibility_by_time_limit_trace = [ {x: utility_possibility_x_axis, y: utility_possibility_y_axis_by_half_opinion}]
+utility_possibility_by_time_limit_trace = [ {x: utility_possibility_x_axis, y: utility_possibility_y_axis_by_time_limit}]
 
 pl = Plotly::Plot.new(data: utility_possibility_by_first_person_trace + utility_possibility_by_majority_vote_trace + utility_possibility_by_time_limit_trace)
 pl.layout.xaxis = { title: 'possibility_correct' }

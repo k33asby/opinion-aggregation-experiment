@@ -1,60 +1,62 @@
 require 'poisson'
 
 class Modeling
-  def initialize(people_num, possibility_correct)
+  def initialize(people_num, possibility_correct, lambda_poisson)
     @people_num = people_num
     @people_half = half_num(@people_num) # 終了の値や半分の値に用いる
     @possibility_correct = possibility_correct
+    @lambda_poisson = lambda_poisson # ポアソン分布の平均lambda
+    @collecting_deadline = lambda_poisson * 2 # 意見収集の締め切り時刻を平均の二倍とする
+    @poisson = Poisson.new(@lambda_poisson) # ポアソン分布を扱うクラスのインスタンス
   end
 
-  # 一人目の意見を採用するという雑魚アルゴリズム
-  # TODO 時刻0から99で行なっているが1から100の方が好ましい気がする
+  WEIGHT = 0.5.to_f
+
+  # 人がいつ来るか配列で表す EXAMPLE [1, 0, 1] => 時刻0と時刻2に人がくる
+  def simulate_when_people_come(people_num)
+    when_people_come = Array.new(@collecting_deadline)
+    people_num.times do |t|
+      when_people_come[t] = 1
+    end
+    when_people_come.shuffle
+  end
+
+
+  # 一人目の意見を採用するというアルゴリズム
   def baseline_method_deciding_by_first_person_with_poisson(possibility_correct)
-    collecting_deadline = 60 # 意見収集の締め切り 59時刻
-    poisson = Poisson.new(30) # 平均30人のポアソン分布
     average_method_utility = 0
-    # 0~59人来るときのみを考慮する(それ以外は0に近似する)
-    60.times do |t_people|
+    # 0~@collecting_deadline人来るときのみを考慮する(平均の二倍以上の人が集まる確率は限りなく0なので0に近似)
+    @collecting_deadline.times do |t_people|
       # t_people人来るとき
-      when_people_come = Array.new(collecting_deadline) # 人がいつ来るか配列で表す
-      temp_probability_by_poisson = poisson.probability{ |x| x == t_people }
-      t_people.times do |t|
-        when_people_come[t] = 1
-      end
-      method_utility = 0 # 効用 = 精度(正解率) - かかる時間(決定する時刻 / collecting_deadline)
+      when_people_come = simulate_when_people_come(t_people)
+      temp_probability_by_poisson = @poisson.probability{ |x| x == t_people }
+      method_utility = 0 # 効用 = 精度(正解率) - 重み * かかる時間(決定する時刻 / collecting_deadline)
       when_people_come.shuffle.each_with_index do |elem, index|
         next if elem.nil? # 人が来ないときは飛ばす
-        weight = 0.5.to_f / collecting_deadline # 時間がかかることに対する重み
-        method_utility += possibility_correct - index.to_f * weight
-        break
+        method_utility += possibility_correct - WEIGHT * (index.to_f / @collecting_deadline)
+        break # 一人目の意見しか必要ないのですぐBREAK
       end
       average_method_utility += temp_probability_by_poisson * method_utility
     end
     average_method_utility
   end
 
-  # 5人で多数決して意見集約を行うというアルゴリズム
-  def baseline_method_deciding_by_majority_vote_with_poisson(possibility_correct)
-    collecting_deadline = 60 # 意見収集の締め切り 59時刻
-    poisson = Poisson.new(30) # 平均30人のポアソン分布
+  # 引数majority_vote_people人で多数決して意見集約を行うというアルゴリズム
+  def baseline_method_deciding_by_majority_vote_with_poisson(possibility_correct, majority_vote_people)
     average_method_utility = 0
-    # 0~59人来るときのみを考慮する(それ以外は0に近似する)
-    60.times do |t_people|
+    # 0~@collecting_deadline人来るときのみを考慮する(平均の二倍以上の人が集まる確率は限りなく0なので0に近似)
+    @collecting_deadline.times do |t_people|
       # t_people人来るとき
-      when_people_come = Array.new(collecting_deadline) # 人がいつ来るか配列で表す
-      temp_probability_by_poisson = poisson.probability{ |x| x == t_people }
-      t_people.times do |t|
-        when_people_come[t] = 1
-      end
-      method_utility = 0 # 効用 = 精度(正解率) - かかる時間(決定する時刻 / collecting_deadline)
+      when_people_come = simulate_when_people_come(t_people)
+      temp_probability_by_poisson = @poisson.probability{ |x| x == t_people }
+      method_utility = 0 # 効用 = 精度(正解率) - 重み* かかる時間(決定する時刻 / collecting_deadline)
       people_count = 0 # 何人目か
-      next if t_people < 5 # 5人集まらない場合は、utility = 0
+      next if t_people < majority_vote_people # majority_vote_people人集まらない場合は、utility = 0
       when_people_come.shuffle.each_with_index do |elem, index|
         next if elem.nil? # 人が来ない時刻は飛ばす
         people_count += 1
-        if people_count == 5
-          weight = 0.5.to_f / collecting_deadline
-          method_utility +=  (1 - relative_error_by_majority_vote(people_count, possibility_correct)) - index.to_f * weight
+        if people_count == majority_vote_people
+          method_utility +=  (1 - relative_error_by_majority_vote(people_count, possibility_correct)) - WEIGHT * (index.to_f / @collecting_deadline)
           break
         end
       end
@@ -63,36 +65,30 @@ class Modeling
     average_method_utility
   end
 
-  # 先に3人集まった方の意見を採用するアルゴリズム
-  def baseline_method_deciding_by_half_opinion_with_poisson(possibility_correct)
-    collecting_deadline = 60 # 意見収集の締め切り 59時刻
-    poisson = Poisson.new(30) # 平均30人のポアソン分布
+  # 先にhalf_num(引数temp_people_num)人集まった方の意見を採用するアルゴリズム
+  def baseline_method_deciding_by_half_opinion_with_poisson(possibility_correct, temp_people_num)
     average_method_utility = 0
-    # 0~59人来るときのみを考慮する(それ以外は0に近似する)
-    60.times do |t_people|
+    # 0~@collecting_deadline人来るときのみを考慮する(平均の二倍以上の人が集まる確率は限りなく0なので0に近似)
+    @collecting_deadline.times do |t_people|
       # t_people人来るとき
-      when_people_come = Array.new(collecting_deadline) # 人がいつ来るか配列で表す
-      temp_probability_by_poisson = poisson.probability{ |x| x == t_people }
-      t_people.times do |t|
-        when_people_come[t] = 1
-      end
-      method_utility = 0 # 効用 = 精度(正解率) - かかる時間(決定する時刻 / collecting_deadline)
+      when_people_come = simulate_when_people_come(t_people)
+      temp_probability_by_poisson = @poisson.probability{ |x| x == t_people }
+      method_utility = 0 # 効用 = 精度(正解率) - 重み * かかる時間(決定する時刻 / collecting_deadline)
       people_count = 0 # 何人目か
       people_count_arr = [] # EXAMPLE [4, 9, 20, 40, 45] 一人目は時刻4にきた　二人目は時刻9にきた...
-      next if t_people < 5 # 5人集まらない場合は、utility = 0
-      when_people_come.shuffle.each_with_index do |elem, index|
+      next if t_people < temp_people_num # temp_people_num人集まらない場合は、utility = 0 TODO temp_people_num人あつまらなくてもその半数は集まることはあるので厳密ではない
+      when_people_come.each_with_index do |elem, index|
         next if elem.nil? # 人が来ない時刻は飛ばす
         people_count_arr << index
         people_count += 1
-        if people_count == 5
-          weight = 0.5.to_f / collecting_deadline
+        if people_count == temp_people_num
           relative_error_array = relative_error_array_by_half_opinion(half_num(people_count), possibility_correct)
           expected_error = relative_error_array.inject(:+)
           average_index = 0
           relative_error_array.each_with_index do |e, i| # もっと簡単にかけそう
             average_index += people_count_arr[i + 2] * (e / expected_error)
           end
-          method_utility =  (1 - expected_error) - average_index.to_f * weight
+          method_utility =  (1 - expected_error) - WEIGHT * (average_index.to_f / @collecting_deadline)
           break
         end
       end
@@ -101,27 +97,19 @@ class Modeling
     average_method_utility
   end
 
-  # 誰か一人集まりかつ、時刻9で意見収集を打ち切り,多数決で意思決定を行う
-  def baseline_method_deciding_by_time_limit_with_poisson(possibility_correct)
-    collecting_deadline = 60 # 意見収集の締め切り 59時刻
-    poisson = Poisson.new(30) # 平均30人のポアソン分布
+  # 誰か一人集まりかつ、時刻引数time_limitで意見収集を打ち切り,多数決で意思決定を行う
+  def baseline_method_deciding_by_time_limit_with_poisson(possibility_correct, time_limit)
     average_method_utility = 0
-    # 0~59人来るときのみを考慮する(それ以外は0に近似する)
-    60.times do |t_people|
+    # 0~@collecting_deadline人来るときのみを考慮する(平均の二倍以上の人が集まる確率は限りなく0なので0に近似)
+    @collecting_deadline.times do |t_people|
       # t_people人来るとき
-      when_people_come = Array.new(collecting_deadline) # 人がいつ来るか配列で表す
-      temp_probability_by_poisson = poisson.probability{ |x| x == t_people }
-      t_people.times do |t|
-        when_people_come[t] = 1
-      end
+      when_people_come = simulate_when_people_come(t_people)  # 人がいつ来るか配列で表す EXAMPLE [1, 0, 1] => 時刻0と時刻2に人がくる
+      temp_probability_by_poisson = @poisson.probability{ |x| x == t_people }
       method_utility = 0 # 効用 = 精度(正解率) - かかる時間(決定する時刻 / collecting_deadline)
       people_count = 0 # 何人目か
-      # people_count_arr = [] # EXAMPLE [4, 9, 20, 40, 45] 一人目は時刻4にきた　二人目は時刻9にきた...
-      # next if t_people < 5 # 5人集まらない場合は、utility = 0
-      when_people_come.shuffle.each_with_index do |elem, index|
-        if index >= 9 && people_count >= 1
-          weight = 0.5.to_f / collecting_deadline
-          method_utility = (1 - relative_error_by_majority_vote(people_count, possibility_correct)) - index.to_f * weight
+      when_people_come.each_with_index do |elem, index|
+        if index >= time_limit && people_count >= 1
+          method_utility = (1 - relative_error_by_majority_vote(people_count, possibility_correct)) - WEIGHT * (index.to_f / @collecting_deadline)
           break
         end
         next if elem.nil? # 人が来ない時刻は飛ばす
