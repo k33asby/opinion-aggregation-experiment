@@ -1,16 +1,15 @@
 require 'poisson'
 
 class Modeling
-  def initialize(people_num, possibility_correct, lambda_poisson)
+  def initialize(people_num, possibility_correct, lambda_poisson, weight)
     @people_num = people_num
     @people_half = half_num(@people_num) # 終了の値や半分の値に用いる
     @possibility_correct = possibility_correct
     @lambda_poisson = lambda_poisson # ポアソン分布の平均lambda
     @collecting_deadline = lambda_poisson * 2 # 意見収集の締め切り時刻を平均の二倍とする
     @poisson = Poisson.new(@lambda_poisson) # ポアソン分布を扱うクラスのインスタンス
+    @weight = weight.to_f # 効用を計算する際の時間に対する重み。精度を重要にしたいなら重みを大きくし、速さを重要にしたいなら重みを小さくする(0.0~1.0の範囲)
   end
-
-  WEIGHT = 0.5.to_f
 
   # 人がいつ来るか配列で表す EXAMPLE [1, 0, 1] => 時刻0と時刻2に人がくる
   def simulate_when_people_come(people_num)
@@ -33,7 +32,7 @@ class Modeling
       method_utility = 0 # 効用 = 精度(正解率) - 重み * かかる時間(決定する時刻 / collecting_deadline)
       when_people_come.shuffle.each_with_index do |elem, index|
         next if elem.nil? # 人が来ないときは飛ばす
-        method_utility += possibility_correct - WEIGHT * (index.to_f / @collecting_deadline)
+        method_utility += possibility_correct - @weight * (index.to_f / @collecting_deadline)
         break # 一人目の意見しか必要ないのですぐBREAK
       end
       average_method_utility += temp_probability_by_poisson * method_utility
@@ -56,7 +55,7 @@ class Modeling
         next if elem.nil? # 人が来ない時刻は飛ばす
         people_count += 1
         if people_count == majority_vote_people
-          method_utility +=  (1 - relative_error_by_majority_vote(people_count, possibility_correct)) - WEIGHT * (index.to_f / @collecting_deadline)
+          method_utility +=  (1 - relative_error_by_majority_vote(people_count, possibility_correct)) - @weight * (index.to_f / @collecting_deadline)
           break
         end
       end
@@ -82,13 +81,13 @@ class Modeling
         people_count_arr << index
         people_count += 1
         if people_count == temp_people_num
-          relative_error_array = relative_error_array_by_half_opinion(half_num(people_count), possibility_correct)
+          relative_error_array = relative_error_array_by_half_opinion(half_num(temp_people_num), possibility_correct)
           expected_error = relative_error_array.inject(:+)
           average_index = 0
           relative_error_array.each_with_index do |e, i| # もっと簡単にかけそう
-            average_index += people_count_arr[i + 2] * (e / expected_error)
+            average_index += people_count_arr[half_num(temp_people_num) - 1 + i] * (e / expected_error)
           end
-          method_utility =  (1 - expected_error) - WEIGHT * (average_index.to_f / @collecting_deadline)
+          method_utility =  (1 - expected_error) - @weight * (average_index.to_f / @collecting_deadline)
           break
         end
       end
@@ -109,7 +108,7 @@ class Modeling
       people_count = 0 # 何人目か
       when_people_come.each_with_index do |elem, index|
         if index >= time_limit && people_count >= 1
-          method_utility = (1 - relative_error_by_majority_vote(people_count, possibility_correct)) - WEIGHT * (index.to_f / @collecting_deadline)
+          method_utility = (1 - relative_error_by_majority_vote(people_count, possibility_correct)) - @weight * (index.to_f / @collecting_deadline)
           break
         end
         next if elem.nil? # 人が来ない時刻は飛ばす
