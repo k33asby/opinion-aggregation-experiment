@@ -4,9 +4,13 @@ require 'rbplotly'
 PEOPELE_NUM = 199
 POSSIBILITY_CORRECT = 0.7
 LAMBDA_POISSON = 70
-WEIGHT = 0.1
+WEIGHT = 0.5
 DELIMITER = 100
 REPEAT = 20
+
+MAJORITY_VOTE_NUM = 5
+EARLIER_NUM = 5
+TIME_LIMIT = 10
 
 # 配列の平均を算出する
 def array_average(arr)
@@ -34,9 +38,9 @@ temp_utility_possibility_y_axis_by_half_opinion = []
 temp_utility_possibility_y_axis_by_time_limit = []
 REPEAT.times do
   temp_utility_possibility_y_axis_by_first_person << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_first_person_with_poisson(e.to_f / DELIMITER) }
-  temp_utility_possibility_y_axis_by_majority_vote << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_majority_vote_with_poisson(e.to_f / DELIMITER, 5) }
-  temp_utility_possibility_y_axis_by_half_opinion << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_half_opinion_with_poisson(e.to_f / DELIMITER, 5) }
-  temp_utility_possibility_y_axis_by_time_limit << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_time_limit_with_poisson(e.to_f / DELIMITER, 10) }
+  temp_utility_possibility_y_axis_by_majority_vote << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_majority_vote_with_poisson(e.to_f / DELIMITER, MAJORITY_VOTE_NUM) }
+  temp_utility_possibility_y_axis_by_half_opinion << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_half_opinion_with_poisson(e.to_f / DELIMITER, EARLIER_NUM) }
+  temp_utility_possibility_y_axis_by_time_limit << utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_time_limit_with_poisson(e.to_f / DELIMITER, TIME_LIMIT) }
 end
 
 # 転置して平均をとる
@@ -53,19 +57,8 @@ utility_possibility_by_time_limit_trace = [{ x: utility_possibility_x_axis, y: u
 pl = Plotly::Plot.new(data: utility_possibility_by_first_person_trace + utility_possibility_by_majority_vote_trace + utility_possibility_by_half_opinion_trace + utility_possibility_by_time_limit_trace)
 pl.layout.xaxis = { title: 'possibility_correct' }
 pl.layout.yaxis = { title: 'utility' }
-pl.layout.title = "LAMBDA_POISSON = #{LAMBDA_POISSON} WEIGHT = #{WEIGHT}"
+pl.layout.title = "LAMBDA_POISSON = #{LAMBDA_POISSON}, WEIGHT = #{WEIGHT}, MAJORITY_VOTE_NUM = #{MAJORITY_VOTE_NUM}, EARLIER_NUM = #{EARLIER_NUM}, TIME_LIMIT = #{TIME_LIMIT}"
 pl.show
-
-exit
-
-# utility_possibility_by_majority_vote_traces_arr = []
-# 5.times do
-#   utility_possibility_by_majority_vote_traces_arr << { x: utility_possibility_x_axis, y: utility_possibility_x_axis.map { |e| model.baseline_method_deciding_by_majority_vote_with_poisson(e.to_f / DELIMITER) } }
-# end
-# pl_by_majority_vote = Plotly::Plot.new(data: utility_possibility_by_majority_vote_traces_arr)
-# pl_by_majority_vote.layout.xaxis = { title: 'possibility_correct' }
-# pl_by_majority_vote.layout.yaxis = { title: 'utility' }
-# pl_by_majority_vote.show
 
 # 縦軸 => 誤差率ε, 横軸 => 人の正解する確率p
 error_possibility_x_axis = (DELIMITER / 2..DELIMITER).to_a
@@ -86,7 +79,7 @@ cost_error_traces = [cost_error_trace1, cost_error_trace2]
 # 縦軸 => 誤差率ε, 横軸 => 人の正解する確率p, people_numを変動させたグラフを重ねる
 error_possibility_model_arr = []
 30.times do |t|
-  error_possibility_model_arr << Modeling.new(1 + 5 * t, POSSIBILITY_CORRECT)
+  error_possibility_model_arr << Modeling.new(1 + 5 * t, POSSIBILITY_CORRECT,0,0)
 end
 error_possibility_traces_arr = []
 error_possibility_model_arr.each do |elem|
@@ -96,7 +89,7 @@ end
 # 縦軸 => 必要な人数X(コスト), 横軸 => 誤差率ε, possibility_correctを変動させたグラフを重ねる
 cost_error_model_arr = []
 9.times do |t|
-  cost_error_model_arr << Modeling.new(PEOPELE_NUM, (55 + (5.to_f * t)) / 100)
+  cost_error_model_arr << Modeling.new(PEOPELE_NUM, (55 + (5.to_f * t)) / 100,0,0)
 end
 cost_error_traces_arr = []
 cost_error_model_arr.each do |elem|
