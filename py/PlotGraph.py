@@ -1,15 +1,9 @@
 class PlotGraph:
 
     def __init__(self, lambda_poisson, repeat, weight, people_num, possibility_correct):
-        self.model = Modeling(50, 50, 0.5)
+        self.model = Modeling(lambda_poisson, repeat, weight)
         self.people_num = people_num
         self.possibility_correct = possibility_correct
-
-    def test(self):
-        x = np.linspace(50, 100, 50)
-        y = 2 * (x**2)
-        plt.plot(x,y)
-        plt.show()
 
     def plot_error_possibility_graph(self):
         x_axis = np.linspace(50,100,50)
@@ -23,6 +17,7 @@ class PlotGraph:
         plt.plot(x_axis, y_axis_half_opinion, label='Half opinion')
         plt.show()
 
+    # 必要になったら実装
     def plot_cost_error_graph(self):
         pass
 
@@ -39,5 +34,44 @@ class PlotGraph:
             plt.plot(x_axis, y_axis)
         plt.show()
 
+    # 必要になったら実装
     def plot_cost_error_graph_by_possibility(self):
+        pass
+
+    def plot_utility_possibility_average_graph(self):
+        x_axis = np.linspace(0.5,1.0,50)
+        y_axis_arr = []
+        y_axis_arr.append([self.model.deciding_by_first_person_with_poisson(x) for x in x_axis])
+        y_axis_arr.append([self.model.deciding_by_majority_vote_with_poisson(x, 9) for x in x_axis])
+        y_axis_arr.append([self.model.deciding_by_half_opinion_with_poisson(x, 5) for x in x_axis])
+        y_axis_arr.append([self.model.deciding_by_time_limit_with_poisson(x, 18) for x in x_axis])
+        plt.hold(True)
+        plt.title('Utility-possibility graph')
+        plt.xlabel('possibility_correct')
+        plt.ylabel('Utility')
+        for y_axis in y_axis_arr:
+            plt.plot(x_axis, y_axis)
+        plt.show()
+
+    def plot_utility_possibility_variance_graph(self):
+        x_axis = np.linspace(0.5,1.0,50)
+        y_axis_arr = []
+        y_axis_arr.append([self.model.deciding_by_first_person_with_poisson_for_variance(x) for x in x_axis])
+        y_axis_arr.append([self.model.deciding_by_majority_vote_with_poisson_for_variance(x, 9) for x in x_axis])
+        y_axis_arr.append([self.model.deciding_by_half_opinion_with_poisson_for_variance(x, 5) for x in x_axis])
+        y_axis_arr.append([self.model.deciding_by_time_limit_with_poisson_for_variance(x, 18) for x in x_axis])
+        plt.hold(True)
+        plt.title('Utility-possibility graph')
+        plt.xlabel('possibility_correct')
+        plt.ylabel('Utility')
+        for y_axis in y_axis_arr:
+            plt.plot(x_axis, y_axis)
+        plt.show()
+
+
+
+    # -----以上はRubyと同じ実装-----
+    # -----ここからは新しい実装-----
+    # 縦軸をutility、横軸を重みにする
+    def plot_utility_weight(arg):
         pass
