@@ -1,11 +1,10 @@
 class Modeling:
 
-    def __init__(self,lambda_poisson, repeat, weight):
+    def __init__(self,lambda_poisson, repeat):
         self.lambda_poisson = lambda_poisson
         self.collecting_deadline = lambda_poisson * 2
         self.repeat = repeat
         self.poisson = np.random.poisson(lambda_poisson, 1000)
-        self.weight = float(weight)
 
     def half_num(self,num):
         return int(math.ceil(float(num) / 2))
@@ -30,7 +29,7 @@ class Modeling:
             relative_error.append(((1 - possibility_correct)**finish_num) * (possibility_correct**t) * scm.comb(finish_num - 1 + t, t))
         return relative_error
 
-    def deciding_by_first_person_with_poisson(self, possibility_correct):
+    def deciding_by_first_person_with_poisson(self, possibility_correct, weight):
         temp_method_utility = 0
         for n in range(self.repeat):
             people_num = self.poisson[n] # ポアソン分布したがって来る人数
@@ -38,13 +37,13 @@ class Modeling:
             method_utility = 0
             for i in range(len(when_people_come)):
                 if when_people_come[i] == 0: continue
-                method_utility += possibility_correct - self.weight * (float(i) / self.collecting_deadline)
+                method_utility += possibility_correct - weight * (float(i) / self.collecting_deadline)
                 break
             temp_method_utility += method_utility
         average_method_utility = temp_method_utility / self.repeat
         return average_method_utility
 
-    def deciding_by_majority_vote_with_poisson(self, possibility_correct, majority_vote_people):
+    def deciding_by_majority_vote_with_poisson(self, possibility_correct, majority_vote_people, weight):
         temp_method_utility = 0
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -56,13 +55,13 @@ class Modeling:
                 if when_people_come[i] == 0: continue
                 people_count += 1
                 if people_count == majority_vote_people:
-                    method_utility += (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - self.weight * (float(i) / self.collecting_deadline)
+                    method_utility += (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - weight * (float(i) / self.collecting_deadline)
                     break
             temp_method_utility += method_utility
         average_method_utility = temp_method_utility / self.repeat
         return average_method_utility
 
-    def deciding_by_half_opinion_with_poisson(self, possibility_correct, temp_people_num):
+    def deciding_by_half_opinion_with_poisson(self, possibility_correct, temp_people_num, weight):
         temp_method_utility = 0
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -81,13 +80,13 @@ class Modeling:
                     average_index = 0
                     for index in range(len(relative_error_array)):
                         average_index += people_count_arr[self.half_num(temp_people_num) - 1 + index] * (relative_error_array[index] / expected_error)
-                    method_utility = (1 - expected_error) - self.weight * (float(average_index) / self.collecting_deadline)
+                    method_utility = (1 - expected_error) - weight * (float(average_index) / self.collecting_deadline)
                     break
             temp_method_utility += method_utility
         average_method_utility = temp_method_utility / self.repeat
         return average_method_utility
 
-    def deciding_by_time_limit_with_poisson(self, possibility_correct, time_limit):
+    def deciding_by_time_limit_with_poisson(self, possibility_correct, time_limit, weight):
         temp_method_utility = 0
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -96,7 +95,7 @@ class Modeling:
             people_count = 0
             for i in range(len(when_people_come)):
                 if i >= time_limit and people_count >= 1:
-                    method_utility = (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - self.weight * (float(i) / self.collecting_deadline)
+                    method_utility = (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - weight * (float(i) / self.collecting_deadline)
                     break
                 if when_people_come[i] == 0: continue
                 people_count += 1
@@ -104,7 +103,7 @@ class Modeling:
         average_method_utility = temp_method_utility / self.repeat
         return average_method_utility
 
-    def deciding_by_first_person_with_poisson_for_variance(self, possibility_correct):
+    def deciding_by_first_person_with_poisson_for_variance(self, possibility_correct, weight):
         temp_method_utility = []
         for n in range(self.repeat):
             people_num = self.poisson[n] # ポアソン分布したがって来る人数
@@ -112,13 +111,13 @@ class Modeling:
             method_utility = 0
             for i in range(len(when_people_come)):
                 if when_people_come[i] == 0: continue
-                method_utility += possibility_correct - self.weight * (float(i) / self.collecting_deadline)
+                method_utility += possibility_correct - weight * (float(i) / self.collecting_deadline)
                 break
             temp_method_utility.append(method_utility)
         variance_method_utility = np.var(temp_method_utility)
         return variance_method_utility
 
-    def deciding_by_majority_vote_with_poisson_for_variance(self, possibility_correct, majority_vote_people):
+    def deciding_by_majority_vote_with_poisson_for_variance(self, possibility_correct, majority_vote_people, weight):
         temp_method_utility = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -130,13 +129,13 @@ class Modeling:
                 if when_people_come[i] == 0: continue
                 people_count += 1
                 if people_count == majority_vote_people:
-                    method_utility += (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - self.weight * (float(i) / self.collecting_deadline)
+                    method_utility += (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - weight * (float(i) / self.collecting_deadline)
                     break
             temp_method_utility.append(method_utility)
         variance_method_utility = np.var(temp_method_utility)
         return variance_method_utility
 
-    def deciding_by_half_opinion_with_poisson_for_variance(self, possibility_correct, temp_people_num):
+    def deciding_by_half_opinion_with_poisson_for_variance(self, possibility_correct, temp_people_num, weight):
         temp_method_utility = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -155,13 +154,13 @@ class Modeling:
                     average_index = 0
                     for index in range(len(relative_error_array)):
                         average_index += people_count_arr[self.half_num(temp_people_num) - 1 + index] * (relative_error_array[index] / expected_error)
-                    method_utility = (1 - expected_error) - self.weight * (float(average_index) / self.collecting_deadline)
+                    method_utility = (1 - expected_error) - weight * (float(average_index) / self.collecting_deadline)
                     break
             temp_method_utility.append(method_utility)
         variance_method_utility = np.var(temp_method_utility)
         return variance_method_utility
 
-    def deciding_by_time_limit_with_poisson_for_variance(self, possibility_correct, time_limit):
+    def deciding_by_time_limit_with_poisson_for_variance(self, possibility_correct, time_limit, weight):
         temp_method_utility = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -170,7 +169,7 @@ class Modeling:
             people_count = 0
             for i in range(len(when_people_come)):
                 if i >= time_limit and people_count >= 1:
-                    method_utility = (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - self.weight * (float(i) / self.collecting_deadline)
+                    method_utility = (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - weight * (float(i) / self.collecting_deadline)
                     break
                 if when_people_come[i] == 0: continue
                 people_count += 1
