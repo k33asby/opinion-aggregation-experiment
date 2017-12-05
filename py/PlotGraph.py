@@ -83,7 +83,7 @@ class PlotGraph:
         y_axis_dict["First peson"] = [self.model.deciding_by_first_person_with_poisson(self.possibility_correct, x) for x in x_axis]
         y_axis_dict["Majority vote"] = [self.model.deciding_by_majority_vote_with_poisson(self.possibility_correct, 9, x) for x in x_axis]
         y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_poisson(self.possibility_correct, 5, x) for x in x_axis]
-        y_axis_dict["Time limit"] = [self.model.deciding_by_time_limit_with_poisson_for(self.possibility_correct, 18, x) for x in x_axis]
+        y_axis_dict["Time limit"] = [self.model.deciding_by_time_limit_with_poisson(self.possibility_correct, 18, x) for x in x_axis]
         plt.hold(True)
         plt.title('Utility-weight graph')
         plt.xlabel('weight')
