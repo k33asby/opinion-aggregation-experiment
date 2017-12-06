@@ -6,7 +6,6 @@ class PlotGraph:
         self.weight = weight
         self.model = Modeling(lambda_poisson, repeat)
         self.people_num = people_num
-        self.half_people = self.model.half_num(people_num)
         self.possibility_correct = possibility_correct
         self.time_limit = time_limit
 
@@ -20,6 +19,7 @@ class PlotGraph:
         plt.ylabel('Relative error')
         plt.plot(x_axis, y_axis_majority_vote, label='Majority vote')
         plt.plot(x_axis, y_axis_half_opinion, label='Half opinion')
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
 
     # 必要になったら実装
@@ -48,7 +48,7 @@ class PlotGraph:
         y_axis_dict = {}
         y_axis_dict["First peson"] = [self.model.deciding_by_first_person_with_poisson(x, self.weight) for x in x_axis]
         y_axis_dict["Majority vote"] = [self.model.deciding_by_majority_vote_with_poisson(x, self.people_num, self.weight) for x in x_axis]
-        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_poisson(x, self.half_people, self.weight) for x in x_axis]
+        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_poisson(x, self.people_num, self.weight) for x in x_axis]
         y_axis_dict["Time limit"] = [self.model.deciding_by_time_limit_with_poisson(x, self.time_limit, self.weight) for x in x_axis]
         plt.hold(True)
         plt.title('Utility-possibility graph')
@@ -56,7 +56,7 @@ class PlotGraph:
         plt.ylabel('Utility')
         for key, value in y_axis_dict.iteritems():
             plt.plot(x_axis, value, label = key)
-        plt.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
 
     def plot_utility_possibility_variance_graph(self):
@@ -64,7 +64,7 @@ class PlotGraph:
         y_axis_dict = {}
         y_axis_dict["First peson"] = [self.model.deciding_by_first_person_with_poisson_for_variance(x, self.weight) for x in x_axis]
         y_axis_dict["Majority vote"] = [self.model.deciding_by_majority_vote_with_poisson_for_variance(x, self.people_num, self.weight) for x in x_axis]
-        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_poisson_for_variance(x, self.half_people, self.weight) for x in x_axis]
+        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_poisson_for_variance(x, self.people_num, self.weight) for x in x_axis]
         y_axis_dict["Time limit"] = [self.model.deciding_by_time_limit_with_poisson_for_variance(x, self.time_limit, self.weight) for x in x_axis]
         plt.hold(True)
         plt.title('Utility-possibility graph')
@@ -72,7 +72,7 @@ class PlotGraph:
         plt.ylabel('Variance')
         for key, value in y_axis_dict.iteritems():
             plt.plot(x_axis, value, label = key)
-        plt.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
 
     # -----以上はRubyと同じ実装-----
@@ -84,7 +84,7 @@ class PlotGraph:
         y_axis_dict = {}
         y_axis_dict["First peson"] = [self.model.deciding_by_first_person_with_poisson(self.possibility_correct, x) for x in x_axis]
         y_axis_dict["Majority vote"] = [self.model.deciding_by_majority_vote_with_poisson(self.possibility_correct, self.people_num, x) for x in x_axis]
-        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_poisson(self.possibility_correct, self.half_people, x) for x in x_axis]
+        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_poisson(self.possibility_correct, self.people_num, x) for x in x_axis]
         y_axis_dict["Time limit"] = [self.model.deciding_by_time_limit_with_poisson(self.possibility_correct, self.time_limit, x) for x in x_axis]
         plt.hold(True)
         plt.title('Utility-weight graph')
@@ -92,7 +92,7 @@ class PlotGraph:
         plt.ylabel('Utility')
         for key, value in y_axis_dict.iteritems():
             plt.plot(x_axis, value, label = key)
-        plt.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
 
     def plot_utility_weight_variance_graph(self):
@@ -100,7 +100,7 @@ class PlotGraph:
         y_axis_dict = {}
         y_axis_dict["First peson"] = [self.model.deciding_by_first_person_with_poisson_for_variance(self.possibility_correct, x) for x in x_axis]
         y_axis_dict["Majority vote"] = [self.model.deciding_by_majority_vote_with_poisson_for_variance(self.possibility_correct, self.people_num, x) for x in x_axis]
-        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_poisson_for_variance(self.possibility_correct, self.half_people, x) for x in x_axis]
+        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_poisson_for_variance(self.possibility_correct, self.people_num, x) for x in x_axis]
         y_axis_dict["Time limit"] = [self.model.deciding_by_time_limit_with_poisson_for_variance(self.possibility_correct, self.time_limit, x) for x in x_axis]
         plt.hold(True)
         plt.title('Utility-weight graph')
@@ -108,7 +108,7 @@ class PlotGraph:
         plt.ylabel('Variance')
         for key, value in y_axis_dict.iteritems():
             plt.plot(x_axis, value, label = key)
-        plt.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
 
     # 多数決を行う人数や時間制限どれくらいが最適であるか
@@ -117,44 +117,44 @@ class PlotGraph:
         x_axis = np.linspace(0.5, 1.0, 50)
         # 最初の一人
         y_axis_dict = {}
-        y_axis_dict["First peson"] = [self.model.deciding_by_first_person_with_poisson(self.possibility_correct, x) for x in x_axis]
-        plt.title('Utility-weight graph')
-        plt.xlabel('weight')
+        y_axis_dict["First person"] = [self.model.deciding_by_first_person_with_poisson(x, self.weight) for x in x_axis]
+        plt.title('Utility-possibility graph')
+        plt.xlabel('Possibility correct')
         plt.ylabel('Utility')
         for key, value in y_axis_dict.iteritems():
             plt.plot(x_axis, value, label = key)
-        plt.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
         # 多数決
         y_axis_dict = {}
         for t in range(15):
-            y_axis_dict["Majority vote" + str(2 * t + 1)] = [self.model.deciding_by_majority_vote_with_poisson(self.possibility_correct, 2 * t + 1, x) for x in x_axis]
-        plt.title('Utility-weight graph')
-        plt.xlabel('weight')
+            y_axis_dict["Majority vote" + str(2 * t + 1)] = [self.model.deciding_by_majority_vote_with_poisson(x, 2 * t + 1, self.weight) for x in x_axis]
+        plt.title('Utility-possibility graph')
+        plt.xlabel('Possibility correct')
         plt.ylabel('Utility')
         for key, value in y_axis_dict.iteritems():
             plt.plot(x_axis, value, label = key)
-        plt.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
         # 半数
         y_axis_dict = {}
         for t in range(15):
-            y_axis_dict["Half opinion" + str(t + 1)] = [self.model.deciding_by_half_opinion_with_poisson(self.possibility_correct, t + 1, x) for x in x_axis]
-        plt.title('Utility-weight graph')
-        plt.xlabel('weight')
+            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_with_poisson(x, t + 1, self.weight) for x in x_axis]
+        plt.title('Utility-possibility graph')
+        plt.xlabel('Possibility correct')
         plt.ylabel('Utility')
         for key, value in y_axis_dict.iteritems():
             plt.plot(x_axis, value, label = key)
-        plt.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
         # 時間打ち切り
         y_axis_dict = {}
         for t in range(15):
-            y_axis_dict["Time limit" + str(4 * t + 1)] = [self.model.deciding_by_time_limit_with_poisson(self.possibility_correct, 4 * t + 1, x) for x in x_axis]
-        plt.title('Utility-weight graph')
-        plt.xlabel('weight')
+            y_axis_dict["Time limit" + str(4 * t + 1)] = [self.model.deciding_by_time_limit_with_poisson(x, 4 * t + 1, self.weight) for x in x_axis]
+        plt.title('Utility-possibility graph')
+        plt.xlabel('Possibility correct')
         plt.ylabel('Utility')
         for key, value in y_axis_dict.iteritems():
             plt.plot(x_axis, value, label = key)
-        plt.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
