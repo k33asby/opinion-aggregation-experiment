@@ -158,3 +158,49 @@ class PlotGraph:
             plt.plot(x_axis, value, label = key)
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
+
+    def plot_utility_possibility_variance_graph_for_single_method(self):
+        x_axis = np.linspace(0.5, 1.0, 50)
+        # 最初の一人
+        y_axis_dict = {}
+        y_axis_dict["First person"] = [self.model.deciding_by_first_person_with_poisson_for_variance(x, self.weight) for x in x_axis]
+        plt.title('Utility-possibility graph')
+        plt.xlabel('Possibility correct')
+        plt.ylabel('Variance')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+        # 多数決
+        y_axis_dict = {}
+        for t in range(15):
+            y_axis_dict["Majority vote" + str(2 * t + 1)] = [self.model.deciding_by_majority_vote_with_poisson_for_variance(x, 2 * t + 1, self.weight) for x in x_axis]
+        plt.title('Utility-possibility graph')
+        plt.xlabel('Possibility correct')
+        plt.ylabel('Variance')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+        # 半数
+        y_axis_dict = {}
+        for t in range(15):
+            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_with_poisson_for_variance(x, t + 1, self.weight) for x in x_axis]
+        plt.title('Utility-possibility graph')
+        plt.xlabel('Possibility correct')
+        plt.ylabel('Variance')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+        # 時間打ち切り
+        y_axis_dict = {}
+        for t in range(15):
+            y_axis_dict["Time limit" + str(4 * t + 1)] = [self.model.deciding_by_time_limit_with_poisson_for_variance(x, 4 * t + 1, self.weight) for x in x_axis]
+        plt.title('Utility-possibility graph')
+        plt.xlabel('Possibility correct')
+        plt.ylabel('Variance')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
