@@ -204,3 +204,35 @@ class PlotGraph:
             plt.plot(x_axis, value, label = key)
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
         plt.show()
+
+    def plot_utility_weight_average_graph_with_uniform_distribution(self):
+        x_axis = np.linspace(0.0, 1.0, 50)
+        y_axis_dict = {}
+        y_axis_dict["First peson"] = [self.model.deciding_by_first_person_with_uniform_distribution(50, 50, x) for x in x_axis]
+        y_axis_dict["Majority vote"] = [self.model.deciding_by_majority_vote_with_uniform_distribution(50, 50, self.people_num, x) for x in x_axis]
+        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_uniform_distribution(50, 50, self.people_num, x) for x in x_axis]
+        y_axis_dict["Time limit"] = [self.model.deciding_by_time_limit_with_uniform_distribution(50, 50, self.time_limit, x) for x in x_axis]
+        plt.hold(True)
+        plt.title('Utility-weight graph')
+        plt.xlabel('weight')
+        plt.ylabel('Utility')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+
+    def plot_utility_weight_variance_graph_with_uniform_distribution(self):
+        x_axis = np.linspace(0.0, 1.0, 50)
+        y_axis_dict = {}
+        y_axis_dict["First peson"] = [self.model.deciding_by_first_person_with_uniform_distribution_for_variance(50, 50, x) for x in x_axis]
+        y_axis_dict["Majority vote"] = [self.model.deciding_by_majority_vote_with_uniform_distribution_for_variance(50, 50, self.people_num, x) for x in x_axis]
+        y_axis_dict["Half opinion"] = [self.model.deciding_by_half_opinion_with_uniform_distribution_for_variance(50, 50, self.people_num, x) for x in x_axis]
+        y_axis_dict["Time limit"] = [self.model.deciding_by_time_limit_with_uniform_distribution_for_variance(50, 50, self.time_limit, x) for x in x_axis]
+        plt.hold(True)
+        plt.title('Utility-weight graph')
+        plt.xlabel('weight')
+        plt.ylabel('Variance')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
