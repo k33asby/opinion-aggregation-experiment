@@ -41,7 +41,7 @@ class Modeling:
     def method_utility_list_decideing_by_first_person(self, possibility_correct, weight):
         method_utility_list = []
         for n in range(self.repeat):
-            people_num = self.poisson[n] # ポアソン分布したがって来る人数
+            people_num = self.poisson[n]
             when_people_come = self.simulate_when_people_come_list(people_num)
             method_utility = 0
             for i in range(len(when_people_come)):
@@ -124,7 +124,7 @@ class Modeling:
         return average_method_utility
 
     def deciding_by_time_limit_average(self, possibility_correct, time_limit, weight):
-        method_utility_list = self.method_utility_list_decideing_by_half_opinion(possibility_correct, time_limit, weight)
+        method_utility_list = self.method_utility_list_decideing_by_time_limit(possibility_correct, time_limit, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
@@ -240,7 +240,7 @@ class Modeling:
         return average_method_utility
 
     def deciding_by_time_limit_average_with_uniform_distribution(self, s_possibility, t_possibility, time_limit, weight):
-        method_utility_list = self.method_utility_list_decideing_by_half_opinion_with_uniform_distribution(s_possibility, t_possibility, time_limit, weight)
+        method_utility_list = self.method_utility_list_decideing_by_time_limit_with_uniform_distribution(s_possibility, t_possibility, time_limit, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
