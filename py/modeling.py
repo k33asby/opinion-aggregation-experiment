@@ -270,9 +270,10 @@ class Modeling:
     # 存在する方法
     # *個人の意見
     # *多数決
-    # *自信による重み付け
-    # *自信の最大のもの
-    # *SP
+    # *先に何票か
+    # *自信による重み付け => ?
+    # *自信の最大のもの => ?
+    # *SP => ?
     # Xを超えてしまったなら、εを大きくしてこれを繰り返す
     def baseline_method(self, people_num, relative_error):
         method_dict = {}
