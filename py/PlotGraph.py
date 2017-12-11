@@ -123,6 +123,7 @@ class PlotGraph:
     # 多数決を行う人数や時間制限どれくらいが最適であるか
     # ポアソン分布の平均にも依存すると考えられる
     # 平均
+    # 縦軸を効用、横軸を個人の正解率
     def plot_utility_possibility_average_graph_for_single_method(self):
         x_axis = np.linspace(0.5, 1.0, 50)
         # 最初の一人
@@ -251,6 +252,108 @@ class PlotGraph:
         y_axis_dict["Time limit"] = [self.model.deciding_by_time_limit_variance_with_uniform_distribution(self.s_possibility, self.t_possibility, self.time_limit, x) for x in x_axis]
         plt.hold(True)
         plt.title('Utility-weight graph majority vote people:{0} timelimit:{1} weight:{2} possibility_correct:{3}~{4}'.format(self.people_num, self.time_limit, self.weight, self.s_possibility, self.s_possibility + self.t_possibility ))
+        plt.xlabel('weight')
+        plt.ylabel('Variance')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+
+    # 多数決を行う人数や時間制限どれくらいが最適であるか
+    # ポアソン分布の平均にも依存すると考えられる
+    # 確率を一様分布として扱う
+    # 平均
+    # 縦軸を効用の平均、横軸を重み
+    def plot_utility_weight_average_graph_with_uniform_distribution_for_single_method(self):
+        x_axis = np.linspace(0.5, 1.0, 50)
+        # 最初の一人
+        y_axis_dict = {}
+        y_axis_dict["First person"] = [self.model.deciding_by_first_person_average_with_uniform_distribution(self.s_possibility, self.t_possibility, x) for x in x_axis]
+        plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(self.s_possibility, self.s_possibility + self.t_possibility))
+        plt.xlabel('weight')
+        plt.ylabel('Utility')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+        # 多数決
+        y_axis_dict = {}
+        for t in range(15):
+            y_axis_dict["Majority vote" + str(2 * t + 1)] = [self.model.deciding_by_majority_vote_average_with_uniform_distribution(self.s_possibility, self.t_possibility, 2 * t + 1, x) for x in x_axis]
+        plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(self.s_possibility, self.s_possibility + self.t_possibility))
+        plt.xlabel('weight')
+        plt.ylabel('Utility')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+        # 半数
+        y_axis_dict = {}
+        for t in range(15):
+            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_average_with_uniform_distribution(self.s_possibility, self.t_possibility, t + 1, x) for x in x_axis]
+        plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(self.s_possibility, self.s_possibility + self.t_possibility))
+        plt.xlabel('weight')
+        plt.ylabel('Utility')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+        # 時間打ち切り
+        y_axis_dict = {}
+        for t in range(15):
+            y_axis_dict["Time limit" + str(4 * t + 1)] = [self.model.deciding_by_time_limit_average_with_uniform_distribution(self.s_possibility, self.t_possibility, 4 * t + 1, x) for x in x_axis]
+        plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(self.s_possibility, self.s_possibility + self.t_possibility))
+        plt.xlabel('weight')
+        plt.ylabel('Utility')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+
+    # 多数決を行う人数や時間制限どれくらいが最適であるか
+    # ポアソン分布の平均にも依存すると考えられる
+    # 確率を一様分布として扱う
+    # 分散
+    # 縦軸を効用の分散、横軸を重み
+    def plot_utility_weight_variance_graph_with_uniform_distribution_for_single_method(self):
+        x_axis = np.linspace(0.5, 1.0, 50)
+        # 最初の一人
+        y_axis_dict = {}
+        y_axis_dict["First person"] = [self.model.deciding_by_first_person_variance_with_uniform_distribution(self.s_possibility, self.t_possibility, x) for x in x_axis]
+        plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(self.s_possibility, self.s_possibility + self.t_possibility))
+        plt.xlabel('weight')
+        plt.ylabel('Variance')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+        # 多数決
+        y_axis_dict = {}
+        for t in range(15):
+            y_axis_dict["Majority vote" + str(2 * t + 1)] = [self.model.deciding_by_majority_vote_variance_with_uniform_distribution(self.s_possibility, self.t_possibility, 2 * t + 1, x) for x in x_axis]
+        plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(self.s_possibility, self.s_possibility + self.t_possibility))
+        plt.xlabel('weight')
+        plt.ylabel('Variance')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+        # 半数
+        y_axis_dict = {}
+        for t in range(15):
+            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_variance_with_uniform_distribution(self.s_possibility, self.t_possibility, t + 1, x) for x in x_axis]
+        plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(self.s_possibility, self.s_possibility + self.t_possibility))
+        plt.xlabel('weight')
+        plt.ylabel('Variance')
+        for key, value in y_axis_dict.iteritems():
+            plt.plot(x_axis, value, label = key)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+        # 時間打ち切り
+        y_axis_dict = {}
+        for t in range(15):
+            y_axis_dict["Time limit" + str(4 * t + 1)] = [self.model.deciding_by_time_limit_variance_with_uniform_distribution(self.s_possibility, self.t_possibility, 4 * t + 1, x) for x in x_axis]
+        plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(self.s_possibility, self.s_possibility + self.t_possibility))
         plt.xlabel('weight')
         plt.ylabel('Variance')
         for key, value in y_axis_dict.iteritems():
