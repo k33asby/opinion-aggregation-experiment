@@ -263,18 +263,3 @@ class Modeling:
         method_utility_list = self.method_utility_list_decideing_by_time_limit_with_uniform_distribution(s_possibility, t_possibility, time_limit, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
-
-    # ベースライン手法
-    # 今X人いる 誤差をε以下にしたい
-    # 存在する方法のなかから最善のものを選択してそれがX人を下回るならそれを採用する
-    # 存在する方法
-    # *個人の意見
-    # *多数決
-    # *先に何票か
-    # *自信による重み付け => ?
-    # *自信の最大のもの => ?
-    # *SP => ?
-    # Xを超えてしまったなら、εを大きくしてこれを繰り返す
-    def baseline_method(self, people_num, relative_error):
-        method_dict = {}
-        pass

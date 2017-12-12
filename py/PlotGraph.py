@@ -130,7 +130,7 @@ class PlotGraph:
         plt.show()
         # 多数決
         y_axis_dict = {}
-        for t in range(15):
+        for t in range(10):
             y_axis_dict["Majority vote" + str(2 * t + 1)] = [self.model.deciding_by_majority_vote_average(x, 2 * t + 1, weight) for x in x_axis]
         plt.title('Utility-possibility graph weight: {}'.format(weight))
         plt.xlabel('Possibility correct')
@@ -141,8 +141,8 @@ class PlotGraph:
         plt.show()
         # 半数
         y_axis_dict = {}
-        for t in range(15):
-            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_average(x, t + 1, weight) for x in x_axis]
+        for t in range(10):
+            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_average(x, 2 * t + 1, weight) for x in x_axis]
         plt.title('Utility-possibility graph weight: {}'.format(weight))
         plt.xlabel('Possibility correct')
         plt.ylabel('Utility')
@@ -152,7 +152,7 @@ class PlotGraph:
         plt.show()
         # 時間打ち切り
         y_axis_dict = {}
-        for t in range(15):
+        for t in range(10):
             y_axis_dict["Time limit" + str(4 * t + 1)] = [self.model.deciding_by_time_limit_average(x, 4 * t + 1, weight) for x in x_axis]
         plt.title('Utility-possibility graph weight: {}'.format(weight))
         plt.xlabel('Possibility correct')
@@ -180,7 +180,7 @@ class PlotGraph:
         plt.show()
         # 多数決
         y_axis_dict = {}
-        for t in range(15):
+        for t in range(10):
             y_axis_dict["Majority vote" + str(2 * t + 1)] = [self.model.deciding_by_majority_vote_variance(x, 2 * t + 1, weight) for x in x_axis]
         plt.title('Utility-possibility graph weight: {}'.format(weight))
         plt.xlabel('Possibility correct')
@@ -191,8 +191,8 @@ class PlotGraph:
         plt.show()
         # 半数
         y_axis_dict = {}
-        for t in range(15):
-            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_variance(x, t + 1, weight) for x in x_axis]
+        for t in range(10):
+            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_variance(x, 2 * t + 1, weight) for x in x_axis]
         plt.title('Utility-possibility graph weight: {}'.format(weight))
         plt.xlabel('Possibility correct')
         plt.ylabel('Variance')
@@ -202,7 +202,7 @@ class PlotGraph:
         plt.show()
         # 時間打ち切り
         y_axis_dict = {}
-        for t in range(15):
+        for t in range(10):
             y_axis_dict["Time limit" + str(4 * t + 1)] = [self.model.deciding_by_time_limit_variance(x, 4 * t + 1, weight) for x in x_axis]
         plt.title('Utility-possibility graph weight: {}'.format(weight))
         plt.xlabel('Possibility correct')
@@ -270,7 +270,7 @@ class PlotGraph:
         plt.show()
         # 多数決
         y_axis_dict = {}
-        for t in range(15):
+        for t in range(10):
             y_axis_dict["Majority vote" + str(2 * t + 1)] = [self.model.deciding_by_majority_vote_average_with_uniform_distribution(s_possibility, t_possibility, 2 * t + 1, x) for x in x_axis]
         plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(s_possibility, s_possibility + t_possibility))
         plt.xlabel('weight')
@@ -281,8 +281,8 @@ class PlotGraph:
         plt.show()
         # 半数
         y_axis_dict = {}
-        for t in range(15):
-            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_average_with_uniform_distribution(s_possibility, t_possibility, t + 1, x) for x in x_axis]
+        for t in range(10):
+            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_average_with_uniform_distribution(s_possibility, t_possibility, 2 * t + 1, x) for x in x_axis]
         plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(s_possibility, s_possibility + t_possibility))
         plt.xlabel('weight')
         plt.ylabel('Utility')
@@ -292,7 +292,7 @@ class PlotGraph:
         plt.show()
         # 時間打ち切り
         y_axis_dict = {}
-        for t in range(15):
+        for t in range(10):
             y_axis_dict["Time limit" + str(4 * t + 1)] = [self.model.deciding_by_time_limit_average_with_uniform_distribution(s_possibility, t_possibility, 4 * t + 1, x) for x in x_axis]
         plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(s_possibility, s_possibility + t_possibility))
         plt.xlabel('weight')
@@ -321,7 +321,7 @@ class PlotGraph:
         plt.show()
         # 多数決
         y_axis_dict = {}
-        for t in range(15):
+        for t in range(10):
             y_axis_dict["Majority vote" + str(2 * t + 1)] = [self.model.deciding_by_majority_vote_variance_with_uniform_distribution(s_possibility, t_possibility, 2 * t + 1, x) for x in x_axis]
         plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(s_possibility, s_possibility + t_possibility))
         plt.xlabel('weight')
@@ -332,8 +332,8 @@ class PlotGraph:
         plt.show()
         # 半数
         y_axis_dict = {}
-        for t in range(15):
-            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_variance_with_uniform_distribution(s_possibility, t_possibility, t + 1, x) for x in x_axis]
+        for t in range(10):
+            y_axis_dict["Half opinion" + str(2 * t + 1)] = [self.model.deciding_by_half_opinion_variance_with_uniform_distribution(s_possibility, t_possibility, 2 * t + 1, x) for x in x_axis]
         plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(s_possibility, s_possibility + t_possibility))
         plt.xlabel('weight')
         plt.ylabel('Variance')
@@ -343,7 +343,7 @@ class PlotGraph:
         plt.show()
         # 時間打ち切り
         y_axis_dict = {}
-        for t in range(15):
+        for t in range(10):
             y_axis_dict["Time limit" + str(4 * t + 1)] = [self.model.deciding_by_time_limit_variance_with_uniform_distribution(s_possibility, t_possibility, 4 * t + 1, x) for x in x_axis]
         plt.title('Utility-possibility graph possibility_correct:{0}~{1}'.format(s_possibility, s_possibility + t_possibility))
         plt.xlabel('weight')
