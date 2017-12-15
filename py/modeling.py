@@ -305,7 +305,7 @@ class Modeling:
 
     # 2,単純な意見集約法
 
-    # 時刻優先意見集約法
+    # 2.1,時刻優先意見集約法
     # 時刻tまで待って多数決を行う
     # 効用を予測精度と所要時間の差で表す
     def time_priority_method(self, t, w, p, lambda_poisson):
@@ -321,3 +321,15 @@ class Modeling:
         for t in range(1, 1000):
             diff = self.time_priority_method(t + 1, w, p, lambda_poisson) - self.time_priority_method(t, w, p, lambda_poisson)
             if diff < 0: return t
+
+    # 2.2, 投票数優先意見集約法
+    # n人集まるまで待って多数決を行う
+    # 効用を予測精度と所要時間の差で表す
+    def poll_priority_method(self, n, w, p, lambda_poisson):
+        utility = 0
+        utility += self.acc(n, p)
+        # 積分を行う
+        t = Symbol('t')
+        integrand = w * t * self.gamma_possibility(n, t, lambda_poisson) # 被積分関数
+        utility -= integrate(integrand, (t, 0, 100))
+        return utility
