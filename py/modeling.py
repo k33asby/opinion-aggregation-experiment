@@ -263,3 +263,61 @@ class Modeling:
         method_utility_list = self.method_utility_list_decideing_by_time_limit_with_uniform_distribution(s_possibility, t_possibility, time_limit, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
+
+    # ------------------以下は理論に基づいた実装を行う------------------
+
+    # 1,準備
+
+    # Poisson過程
+    # 単位時間あたりの到着数 λ
+    # 時刻tまでにn人が到着する確率
+    def poisson_possibility(self, n, t, lambda_poisson):
+        return math.e**(-lambda_poisson * t) * (lambda_poisson * t)**n / math.factorial(n)
+
+    # Gamma分布
+    # 時刻tにn人目が到着する確率
+    def gamma_possibility(self, n, t, lambda_poisson):
+        return lambda_poisson**n / math.factorial(n - 1) * t**(n - 1) * math.e**(-lambda_poisson * t)
+
+    # 多数決による判定精度
+    # n人で多数決を行う場合の判定精度をacc(n)で表す
+    # 個人の判定精度をpとする
+    def acc_odd(self, n, p): # nが奇数2i-1のとき
+        i = int((n + 1) / 2)
+        acc = 0
+        for j in range(i):
+            acc += scm.comb(2 * i - 1, j) * p**(2 * i - 1 - j) * (1 - p)**j
+        return acc
+
+    def acc_even(self, n, p): # nが偶数2iのとき
+        i = int(n / 2)
+        acc = 0
+        for j in range(i):
+            acc += scm.comb(2 * i, j) * p**(2 * i - j) * (1 - p)**j
+        acc += scm.comb(2 * i, i) * p**i * (1 - p)**i / 2
+        return acc
+
+    def acc(self, n, p):
+        if n % 2 == 1:
+            return self.acc_odd(n, p)
+        else:
+            return self.acc_even(n, p)
+
+    # 2,単純な意見集約法
+
+    # 時刻優先意見集約法
+    # 時刻tまで待って多数決を行う
+    # 効用を予測精度と所要時間の差で表す
+    def time_priority_method(self, t, w, p, lambda_poisson):
+        utility = 0
+        for i in range(1, lambda_poisson * t, 1):
+            utility += self.poisson_possibility(2 * i - 1, t, lambda_poisson) * self.acc_odd(2 * i - 1, p)
+            utility += self.poisson_possibility(2 * i, t, lambda_poisson) * self.acc_even(2 * i, p)
+        utility -= w * t
+        return utility
+
+    # 増減を調べる
+    def inc_and_dec_time_priority_method(self, w, p, lambda_poisson):
+        for t in range(1, 1000):
+            diff = self.time_priority_method(t + 1, w, p, lambda_poisson) - self.time_priority_method(t, w, p, lambda_poisson)
+            if diff < 0: return t
