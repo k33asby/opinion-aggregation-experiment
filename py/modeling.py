@@ -277,7 +277,7 @@ class Modeling:
     # Gamma分布
     # 時刻tにn人目が到着する確率
     def gamma_possibility(self, n, t, lambda_poisson):
-        return lambda_poisson**n / math.factorial(n - 1) * t**(n - 1) * math.e**(-lambda_poisson * t)
+        return lambda_poisson**n * t**(n - 1) * math.e**(-lambda_poisson * t) / math.factorial(n - 1)
 
     # 多数決による判定精度
     # n人で多数決を行う場合の判定精度をacc(n)で表す
@@ -331,5 +331,18 @@ class Modeling:
         # 積分を行う
         t = Symbol('t')
         integrand = w * t * self.gamma_possibility(n, t, lambda_poisson) # 被積分関数
-        utility -= integrate(integrand, (t, 0, 100))
+        utility -= integrate(integrand, (t, 0, 1000))
+        return utility
+
+    # 2.3, 得票数優先意見集約法
+    # 先にk票集まった案に決定する
+    # 効用を予測精度と所要時間の差で表す
+    def vote_priority_method(self, k, w, p, lambda_poisson):
+        utility = 0
+        for j in range(k, 2 * k):
+            utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
+            # 積分を行う
+            t = Symbol('t')
+            integrand = w * t * self.gamma_possibility(j, t, lambda_poisson) # 被積分関数
+            utility -= integrate(integrand, (t, 0, 1000))
         return utility
