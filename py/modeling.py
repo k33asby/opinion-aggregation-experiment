@@ -351,10 +351,29 @@ class Modeling:
             utility -= value
         return utility
 
-
     # 3, 組み合わせ意見集約法
     # 方法1, 時刻T1まで待つ
     # 方法2, 投票者数がnに達すれば判定し終了、達しなければT1まで待つ
     # 方法3, 時刻T2(=< T1)までに投票者数がnに達すれば判定し終了、達しなければT1まで待つ(T2 = T1とすれば方法2と方法3は同じ)
     # 方法4, 得票者数がkに達すれば判定し終了、達しなければT1まで待つ
     # 方法5, 時間T2(=< T1)までに得票者数がkに達すれば判定を終了し、達しなければT1まで待つ (T2 = T1とすれば方法4と方法5は同じ)
+
+    # 方法1(時刻優先意見集約法と同じ)
+    def method1(self, t, w, p, lambda_poisson):
+        return self.time_priority_method(t, w, p, lambda_poisson)
+
+    # 方法2
+    def method2(self, t1, n, w, p, lambda_poisson):
+        utility = 0
+        for i in range(0, n):
+            utility += self.poisson_possibility(i, t1, lambda_poisson) * (self.acc(i, p) - w * t1)
+        # 積分を行う
+        t = Symbol('t')
+        integrand = (self.acc(n, p) - w * t) * self.gamma_possibility(n, t, lambda_poisson) # 被積分関数
+        f = lambdify(t, integrand)
+        value, abserr = integrate.quad(f, 0, t1)
+        utility += value
+        # 以下は必要か不明(おそらく不要)
+        # for i in range(n + 1, 100):
+        #     utility += self.poisson_possibility(i, t1, lambda_poisson) * (self.acc(n, p) - w * t1)
+        return utility
