@@ -331,7 +331,9 @@ class Modeling:
         # 積分を行う
         t = Symbol('t')
         integrand = w * t * self.gamma_possibility(n, t, lambda_poisson) # 被積分関数
-        utility -= integrate(integrand, (t, 0, 1000))
+        f = lambdify(t, integrand)
+        value, abserr = integrate.quad(f, 0, 1000)
+        utility -= value
         return utility
 
     # 2.3, 得票数優先意見集約法
@@ -344,5 +346,15 @@ class Modeling:
             # 積分を行う
             t = Symbol('t')
             integrand = w * t * self.gamma_possibility(j, t, lambda_poisson) # 被積分関数
-            utility -= integrate(integrand, (t, 0, 1000))
+            f = lambdify(t, integrand)
+            value, abserr = integrate.quad(f, 0, 1000)
+            utility -= value
         return utility
+
+
+    # 3, 組み合わせ意見集約法
+    # 方法1, 時刻T1まで待つ
+    # 方法2, 投票者数がnに達すれば判定し終了、達しなければT1まで待つ
+    # 方法3, 時刻T2(=< T1)までに投票者数がnに達すれば判定し終了、達しなければT1まで待つ(T2 = T1とすれば方法2と方法3は同じ)
+    # 方法4, 得票者数がkに達すれば判定し終了、達しなければT1まで待つ
+    # 方法5, 時間T2(=< T1)までに得票者数がkに達すれば判定を終了し、達しなければT1まで待つ (T2 = T1とすれば方法4と方法5は同じ)
