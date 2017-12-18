@@ -377,3 +377,10 @@ class Modeling:
         # for i in range(n + 1, 100):
         #     utility += self.poisson_possibility(i, t1, lambda_poisson) * (self.acc(n, p) - w * t1)
         return utility
+
+    # 増減を調べる
+    def inc_and_dec_time_method2(self, t1, w, p, lambda_poisson)):
+        for n in range(1, 1000):
+            diff = self.method2(t1, n + 1, w, p, lambda_poisson) - self.method2(t1, n, w, p, lambda_poisson)
+            if diff < 0: return n
+        print "極値なし"
