@@ -329,10 +329,7 @@ class Modeling:
         utility = 0
         utility += self.acc(n, p)
         # 積分を行う
-        t = Symbol('t')
-        integrand = w * t * self.gamma_possibility(n, t, lambda_poisson) # 被積分関数
-        f = lambdify(t, integrand)
-        value, abserr = integrate.quad(f, 0, 1000)
+        value, abserr = integrate.quad(lambda t: w * t * self.gamma_possibility(n, t, lambda_poisson), 0, 1000)
         utility -= value
         return utility
 
@@ -344,10 +341,7 @@ class Modeling:
         for j in range(k, 2 * k):
             utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
             # 積分を行う
-            t = Symbol('t')
-            integrand = w * t * self.gamma_possibility(j, t, lambda_poisson) # 被積分関数
-            f = lambdify(t, integrand)
-            value, abserr = integrate.quad(f, 0, 1000)
+            value, abserr = integrate.quad(lambda t: w * t * self.gamma_possibility(j, t, lambda_poisson), 0, 1000)
             utility -= value
         return utility
 
@@ -368,10 +362,7 @@ class Modeling:
         for i in range(0, n):
             utility += self.poisson_possibility(i, t1, lambda_poisson) * (self.acc(i, p) - w * t1)
         # 積分を行う
-        t = Symbol('t')
-        integrand = (self.acc(n, p) - w * t) * self.gamma_possibility(n, t, lambda_poisson) # 被積分関数
-        f = lambdify(t, integrand)
-        value, abserr = integrate.quad(f, 0, t1)
+        value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_possibility(n, t, lambda_poisson), 0, t1)
         utility += value
         # 以下は必要か不明(おそらく不要)
         # for i in range(n + 1, 100):
@@ -379,8 +370,8 @@ class Modeling:
         return utility
 
     # 増減を調べる
-    def inc_and_dec_time_method2(self, t1, w, p, lambda_poisson)):
-        for n in range(1, 1000):
-            diff = self.method2(t1, n + 1, w, p, lambda_poisson) - self.method2(t1, n, w, p, lambda_poisson)
-            if diff < 0: return n
-        print "極値なし"
+    def inc_and_dec_time_method2(self, t1, w, p, lambda_poisson):
+        for n in range(1, 50):
+            diff = self.method2(t1, 2 * n + 1, w, p, lambda_poisson) - self.method2(t1, 2 * n - 1, w, p, lambda_poisson)
+            if diff < 0:
+                return 2 * n - 1
