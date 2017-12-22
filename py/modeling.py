@@ -339,10 +339,10 @@ class Modeling:
     def vote_priority_method(self, k, w, p, lambda_poisson):
         utility = 0
         for j in range(k, 2 * k):
-            utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
+            temp_possibility = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
             # 積分を行う
             value, abserr = integrate.quad(lambda t: w * t * self.gamma_possibility(j, t, lambda_poisson), 0, 1000)
-            utility -= value
+            utility += temp_possibility * (1 - value)
         return utility
 
     # 3, 組み合わせ意見集約法
