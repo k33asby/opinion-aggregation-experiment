@@ -355,11 +355,11 @@ class Modeling:
     # 方法4, 得票者数がkに達すれば判定し終了、達しなければT1まで待つ
     # 方法5, 時間T2(=< T1)までに得票者数がkに達すれば判定を終了し、達しなければT1まで待つ (T2 = T1とすれば方法4と方法5は同じ)
 
-    # 方法1(時刻優先意見集約法と同じ)
+    # 方法1(時刻優先意見集約法と同じ) 時刻T1まで待つ
     def method1(self, t, w, p, lambda_poisson):
         return self.time_priority_method(t, w, p, lambda_poisson)
 
-    # 方法2
+    # 方法2 投票者数がnに達すれば判定し終了、達しなければT1まで待つ
     def method2(self, t1, n, w, p, lambda_poisson):
         if n == 0: return 0
         utility = 0
@@ -379,3 +379,48 @@ class Modeling:
             diff = self.method2(t1, 2 * n + 1, w, p, lambda_poisson) - self.method2(t1, 2 * n - 1, w, p, lambda_poisson)
             if diff < 0:
                 return 2 * n - 1
+
+    # 方法3 時刻T2(=< T1)までに投票者数がnに達すれば判定し終了、達しなければT1まで待つ(T2 = T1とすれば方法2と方法3は同じ)
+    def method3(self, t1, t2, n, w, p, lambda_poisson):
+        if n == 0: return 0
+        utility = 0
+        for i in range(0, n):
+            utility += self.poisson_possibility(i, t2, lambda_poisson) * (self.acc(i, p) - w * t2)
+        # 積分を行う
+        value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_possibility(n, t, lambda_poisson), 0, t1)
+        utility += value
+        return utility
+
+    # def integrand_for_method4(self, t):
+    #     integrand = 0
+    #     for j in range(k, 2 * k):
+    #         temp_possibility = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
+    #         integrand += self.gamma_possibility(j, t, lambda_poisson) * temp_possibility * (1 - w * t)
+    #     return integrand
+
+
+    # 方法4 得票者数がkに達すれば判定し終了、達しなければT1まで待つ
+    def method4(self, t1, k, w, p, lambda_poisson):
+        if k == 0: return 0
+        utility = 0
+        temp_integrand = 0
+        # ----被積分関数を定義----
+        def integrand_for_method4(t):
+            integrand = 0
+            for j in range(k, 2 * k):
+                temp_possibility = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
+                integrand += self.gamma_possibility(j, t, lambda_poisson) * temp_possibility * (1 - w * t)
+            return integrand
+        # --------終わり--------
+        for i in range(0, k):
+            for j in range(i, 2 * i):
+                temp_possibility = scm.comb(j - 1, j - i) * p**(i - 1) * (1 - p)**(j - i) * p
+                utility += self.poisson_possibility(i, t1, lambda_poisson) * temp_possibility * (1 - w * t1)
+        #積分を行う
+        value, abserr = integrate.quad(integrand_for_method4, 0, t1)
+        utility += value
+        return utility
+
+
+
+        return utility
