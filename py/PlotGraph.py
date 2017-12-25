@@ -1,6 +1,7 @@
 class PlotGraph:
 
     def __init__(self, lambda_poisson, repeat):
+        sns.set_style("whitegrid")
         self.model = Modeling(lambda_poisson, repeat)
 
     # 縦軸を誤差率、横軸を個人の正解率
@@ -351,4 +352,72 @@ class PlotGraph:
         for key, value in y_axis_dict.iteritems():
             plt.plot(x_axis, value, label = key)
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+        plt.show()
+
+    # ---------------------以下は理論に基づいた実装に対するグラフメソッド---------------------
+    def plot_poisson(self, time, lambda_poisson):
+        x_axis = np.linspace(0, 2 * time * lambda_poisson, 2 * time * lambda_poisson + 1)
+        y_axis = []
+        for x in x_axis:
+            y_axis.append(m.poisson_possibility(x, time, lambda_poisson))
+        plt.title('poisson time: {0} lambda: {1}'.format(time, lambda_poisson))
+        plt.xlabel('people')
+        plt.ylabel('possibility')
+        plt.plot(x_axis, y_axis)
+        plt.show()
+
+    def plot_gamma(self, people, lambda_poisson):
+        x_axis = np.linspace(0, 2 * people / lambda_poisson , 2 * people / lambda_poisson + 1)
+        y_axis = []
+        for x in x_axis:
+            y_axis.append(m.gamma_possibility(people, x, lambda_poisson))
+        plt.title('gamma people: {0} lambda: {1}'.format(people, lambda_poisson))
+        plt.xlabel('time')
+        plt.ylabel('possibility')
+        plt.plot(x_axis, y_axis)
+        plt.show()
+
+    def plot_time_priority(self, w, p, lambda_poisson):
+        x_axis = np.linspace(0, 50, 51)
+        y_axis = [m.time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+        plt.title('time priority method weight: {0} person_possibility: {1}'.format(w, p))
+        plt.xlabel('time')
+        plt.ylabel('utility')
+        plt.plot(x_axis, y_axis)
+        plt.show()
+
+    def plot_poll_priority(self, w, p, lambda_poisson):
+        x_axis = np.linspace(0, 50, 51)
+        y_axis = [m.poll_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+        plt.title('poll priority method weight: {0} person_possibility: {1}'.format(w, p))
+        plt.xlabel('poll people')
+        plt.ylabel('utility')
+        plt.plot(x_axis, y_axis)
+        plt.show()
+
+    def plot_vote_priority(self, w, p, lambda_poisson):
+        x_axis = np.linspace(0, 50, 51)
+        y_axis = [m.poll_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+        plt.title('voge priority method weight: {0} person_possibility: {1}'.format(w, p))
+        plt.xlabel('require vote people')
+        plt.ylabel('utility')
+        plt.plot(x_axis, y_axis)
+        plt.show()
+
+    def plot_method1(self, w, p, lambda_poisson):
+        x_axis = np.linspace(0, 50, 51)
+        y_axis = [m.time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+        plt.title('method1 weight: {0} person_possibility: {1}'.format(w, p))
+        plt.xlabel('time')
+        plt.ylabel('utility')
+        plt.plot(x_axis, y_axis)
+        plt.show()
+
+    def plot_method2(self, t1, w, p, lambda_poisson):
+        x_axis = np.linspace(0, 50, 51)
+        y_axis = [m.method2(t1,int(x), w, p, lambda_poisson) for x in x_axis]
+        plt.title('method2 T1: {0} weight: {1} person_possibility: {2}'.format(t1, w, p))
+        plt.xlabel('poll people')
+        plt.ylabel('utility')
+        plt.plot(x_axis, y_axis)
         plt.show()

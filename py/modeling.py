@@ -309,6 +309,7 @@ class Modeling:
     # 時刻tまで待って多数決を行う
     # 効用を予測精度と所要時間の差で表す
     def time_priority_method(self, t, w, p, lambda_poisson):
+        if t == 0: return 0
         utility = 0
         for i in range(1, lambda_poisson * t, 1):
             utility += self.poisson_possibility(2 * i - 1, t, lambda_poisson) * self.acc_odd(2 * i - 1, p)
@@ -326,6 +327,7 @@ class Modeling:
     # n人集まるまで待って多数決を行う
     # 効用を予測精度と所要時間の差で表す
     def poll_priority_method(self, n, w, p, lambda_poisson):
+        if n == 0: return 0
         utility = 0
         utility += self.acc(n, p)
         # 積分を行う
@@ -337,6 +339,7 @@ class Modeling:
     # 先にk票集まった案に決定する
     # 効用を予測精度と所要時間の差で表す
     def vote_priority_method(self, k, w, p, lambda_poisson):
+        if k == 0: return 0
         utility = 0
         for j in range(k, 2 * k):
             temp_possibility = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
@@ -358,6 +361,7 @@ class Modeling:
 
     # 方法2
     def method2(self, t1, n, w, p, lambda_poisson):
+        if n == 0: return 0
         utility = 0
         for i in range(0, n):
             utility += self.poisson_possibility(i, t1, lambda_poisson) * (self.acc(i, p) - w * t1)
