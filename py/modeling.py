@@ -16,29 +16,29 @@ class Modeling:
         random.shuffle(when_people_come)
         return when_people_come
 
-    def possibility_correct_by_majority_vote(self, people_num, possibility_correct):
-        return (1 - self.relative_error_by_majority_vote(people_num, possibility_correct))
+    def probability_correct_by_majority_vote(self, people_num, probability_correct):
+        return (1 - self.relative_error_by_majority_vote(people_num, probability_correct))
 
-    def relative_error_by_majority_vote(self, people_num, possibility_correct):
+    def relative_error_by_majority_vote(self, people_num, probability_correct):
         half_num = self.half_num(people_num)
         relative_error = 0
         for t in range(half_num):
-            relative_error += (possibility_correct**t) * ((1 - possibility_correct)**(people_num - t)) * scm.comb(people_num, t)
+            relative_error += (probability_correct**t) * ((1 - probability_correct)**(people_num - t)) * scm.comb(people_num, t)
         return relative_error
 
-    def possibility_correct_list_by_half_opinion(self, finish_num, possibility_correct):
-        possibility_correct_list = []
+    def probability_correct_list_by_half_opinion(self, finish_num, probability_correct):
+        probability_correct_list = []
         for t in range(finish_num):
-            possibility_correct_list.append((possibility_correct**finish_num) * ((1 - possibility_correct)**t) * scm.comb(finish_num - 1 + t, t))
-        return possibility_correct_list
+            probability_correct_list.append((probability_correct**finish_num) * ((1 - probability_correct)**t) * scm.comb(finish_num - 1 + t, t))
+        return probability_correct_list
 
-    def relative_error_list_by_half_opinion(self, finish_num, possibility_correct):
+    def relative_error_list_by_half_opinion(self, finish_num, probability_correct):
         relative_error = []
         for t in range(finish_num):
-            relative_error.append(((1 - possibility_correct)**finish_num) * (possibility_correct**t) * scm.comb(finish_num - 1 + t, t))
+            relative_error.append(((1 - probability_correct)**finish_num) * (probability_correct**t) * scm.comb(finish_num - 1 + t, t))
         return relative_error
 
-    def method_utility_list_decideing_by_first_person(self, possibility_correct, weight):
+    def method_utility_list_decideing_by_first_person(self, probability_correct, weight):
         method_utility_list = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -46,12 +46,12 @@ class Modeling:
             method_utility = 0
             for i in range(len(when_people_come)):
                 if when_people_come[i] == 0: continue
-                method_utility += possibility_correct - weight * (float(i) / self.collecting_deadline)
+                method_utility += probability_correct - weight * (float(i) / self.collecting_deadline)
                 break
             method_utility_list.append(method_utility)
         return method_utility_list
 
-    def method_utility_list_decideing_by_majority_vote(self, possibility_correct, majority_vote_people, weight):
+    def method_utility_list_decideing_by_majority_vote(self, probability_correct, majority_vote_people, weight):
         method_utility_list = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -63,12 +63,12 @@ class Modeling:
                 if when_people_come[i] == 0: continue
                 people_count += 1
                 if people_count == majority_vote_people:
-                    method_utility +=  self.possibility_correct_by_majority_vote(people_count, possibility_correct) - weight * (float(i) / self.collecting_deadline)
+                    method_utility +=  self.probability_correct_by_majority_vote(people_count, probability_correct) - weight * (float(i) / self.collecting_deadline)
                     break
             method_utility_list.append(method_utility)
         return method_utility_list
 
-    def method_utility_list_decideing_by_half_opinion(self, possibility_correct, temp_people_num, weight):
+    def method_utility_list_decideing_by_half_opinion(self, probability_correct, temp_people_num, weight):
         method_utility_list = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -82,17 +82,17 @@ class Modeling:
                 people_count_list.append(i)
                 people_count += 1
                 if people_count == temp_people_num:
-                    possibility_correct_list = self.possibility_correct_list_by_half_opinion(self.half_num(temp_people_num), possibility_correct)
-                    sum_possibility = sum(possibility_correct_list)
+                    probability_correct_list = self.probability_correct_list_by_half_opinion(self.half_num(temp_people_num), probability_correct)
+                    sum_probability = sum(probability_correct_list)
                     average_index = 0
-                    for index in range(len(possibility_correct_list)):
-                        average_index += people_count_list[self.half_num(temp_people_num) - 1 + index] * (possibility_correct_list[index] / sum_possibility)
-                    method_utility = sum_possibility - weight * (float(average_index) / self.collecting_deadline)
+                    for index in range(len(probability_correct_list)):
+                        average_index += people_count_list[self.half_num(temp_people_num) - 1 + index] * (probability_correct_list[index] / sum_probability)
+                    method_utility = sum_probability - weight * (float(average_index) / self.collecting_deadline)
                     break
             method_utility_list.append(method_utility)
         return method_utility_list
 
-    def method_utility_list_decideing_by_time_limit(self, possibility_correct, time_limit, weight):
+    def method_utility_list_decideing_by_time_limit(self, probability_correct, time_limit, weight):
         method_utility_list = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
@@ -101,74 +101,74 @@ class Modeling:
             people_count = 0
             for i in range(len(when_people_come)):
                 if i >= time_limit and people_count >= 1:
-                    method_utility = (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - weight * (float(i) / self.collecting_deadline)
+                    method_utility = (1 - self.relative_error_by_majority_vote(people_count, probability_correct)) - weight * (float(i) / self.collecting_deadline)
                     break
                 if when_people_come[i] == 0: continue
                 people_count += 1
             method_utility_list.append(method_utility)
         return method_utility_list
 
-    def deciding_by_first_person_average(self, possibility_correct, weight):
-        method_utility_list = self.method_utility_list_decideing_by_first_person(possibility_correct, weight)
+    def deciding_by_first_person_average(self, probability_correct, weight):
+        method_utility_list = self.method_utility_list_decideing_by_first_person(probability_correct, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
-    def deciding_by_majority_vote_average(self, possibility_correct, majority_vote_people, weight):
-        method_utility_list = self.method_utility_list_decideing_by_majority_vote(possibility_correct, majority_vote_people, weight)
+    def deciding_by_majority_vote_average(self, probability_correct, majority_vote_people, weight):
+        method_utility_list = self.method_utility_list_decideing_by_majority_vote(probability_correct, majority_vote_people, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
-    def deciding_by_half_opinion_average(self, possibility_correct, temp_people_num, weight):
-        method_utility_list = self.method_utility_list_decideing_by_half_opinion(possibility_correct, temp_people_num, weight)
+    def deciding_by_half_opinion_average(self, probability_correct, temp_people_num, weight):
+        method_utility_list = self.method_utility_list_decideing_by_half_opinion(probability_correct, temp_people_num, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
-    def deciding_by_time_limit_average(self, possibility_correct, time_limit, weight):
-        method_utility_list = self.method_utility_list_decideing_by_time_limit(possibility_correct, time_limit, weight)
+    def deciding_by_time_limit_average(self, probability_correct, time_limit, weight):
+        method_utility_list = self.method_utility_list_decideing_by_time_limit(probability_correct, time_limit, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
-    def deciding_by_first_person_variance(self, possibility_correct, weight):
-        method_utility_list = self.method_utility_list_decideing_by_first_person(possibility_correct, weight)
+    def deciding_by_first_person_variance(self, probability_correct, weight):
+        method_utility_list = self.method_utility_list_decideing_by_first_person(probability_correct, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
 
-    def deciding_by_majority_vote_variance(self, possibility_correct, majority_vote_people, weight):
-        method_utility_list = self.method_utility_list_decideing_by_majority_vote(possibility_correct, majority_vote_people, weight)
+    def deciding_by_majority_vote_variance(self, probability_correct, majority_vote_people, weight):
+        method_utility_list = self.method_utility_list_decideing_by_majority_vote(probability_correct, majority_vote_people, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
 
-    def deciding_by_half_opinion_variance(self, possibility_correct, temp_people_num, weight):
-        method_utility_list = self.method_utility_list_decideing_by_half_opinion(possibility_correct, temp_people_num, weight)
+    def deciding_by_half_opinion_variance(self, probability_correct, temp_people_num, weight):
+        method_utility_list = self.method_utility_list_decideing_by_half_opinion(probability_correct, temp_people_num, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
 
-    def deciding_by_time_limit_variance(self, possibility_correct, time_limit, weight):
-        method_utility_list = self.method_utility_list_decideing_by_time_limit(possibility_correct, time_limit, weight)
+    def deciding_by_time_limit_variance(self, probability_correct, time_limit, weight):
+        method_utility_list = self.method_utility_list_decideing_by_time_limit(probability_correct, time_limit, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
 
     # 個人の正解率を一様分布で表現する
-    # s_possibility ~ s_possibility + t_possibilityまでの一様分布の個人の正解率
-    def method_utility_list_decideing_by_first_person_with_uniform_distribution(self, s_possibility, t_possibility, weight):
+    # s_probability ~ s_probability + t_probabilityまでの一様分布の個人の正解率
+    def method_utility_list_decideing_by_first_person_with_uniform_distribution(self, s_probability, t_probability, weight):
         method_utility_list = []
         for n in range(self.repeat):
             people_num = self.poisson[n] # ポアソン分布したがって来る人数
-            possibility_correct = (np.random.rand() * t_possibility + s_possibility) / 100
+            probability_correct = (np.random.rand() * t_probability + s_probability) / 100
             when_people_come = self.simulate_when_people_come_list(people_num)
             method_utility = 0
             for i in range(len(when_people_come)):
                 if when_people_come[i] == 0: continue
-                method_utility += possibility_correct - weight * (float(i) / self.collecting_deadline)
+                method_utility += probability_correct - weight * (float(i) / self.collecting_deadline)
                 break
             method_utility_list.append(method_utility)
         return method_utility_list
 
-    def method_utility_list_decideing_by_majority_vote_with_uniform_distribution(self, s_possibility, t_possibility, majority_vote_people, weight):
+    def method_utility_list_decideing_by_majority_vote_with_uniform_distribution(self, s_probability, t_probability, majority_vote_people, weight):
         method_utility_list = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
-            possibility_correct = (np.random.rand() * t_possibility + s_possibility) / 100
+            probability_correct = (np.random.rand() * t_probability + s_probability) / 100
             when_people_come = self.simulate_when_people_come_list(people_num)
             method_utility = 0
             people_count = 0
@@ -177,16 +177,16 @@ class Modeling:
                 if when_people_come[i] == 0: continue
                 people_count += 1
                 if people_count == majority_vote_people:
-                    method_utility += (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - weight * (float(i) / self.collecting_deadline)
+                    method_utility += (1 - self.relative_error_by_majority_vote(people_count, probability_correct)) - weight * (float(i) / self.collecting_deadline)
                     break
             method_utility_list.append(method_utility)
         return method_utility_list
 
-    def method_utility_list_decideing_by_half_opinion_with_uniform_distribution(self, s_possibility, t_possibility, temp_people_num, weight):
+    def method_utility_list_decideing_by_half_opinion_with_uniform_distribution(self, s_probability, t_probability, temp_people_num, weight):
         method_utility_list = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
-            possibility_correct = (np.random.rand() * t_possibility + s_possibility) / 100
+            probability_correct = (np.random.rand() * t_probability + s_probability) / 100
             when_people_come = self.simulate_when_people_come_list(people_num)
             method_utility = 0
             people_count = 0
@@ -197,70 +197,70 @@ class Modeling:
                 people_count_list.append(i)
                 people_count += 1
                 if people_count == temp_people_num:
-                    possibility_correct_list = self.possibility_correct_list_by_half_opinion(self.half_num(temp_people_num), possibility_correct)
-                    sum_possibility = sum(possibility_correct_list)
+                    probability_correct_list = self.probability_correct_list_by_half_opinion(self.half_num(temp_people_num), probability_correct)
+                    sum_probability = sum(probability_correct_list)
                     average_index = 0
-                    for index in range(len(possibility_correct_list)):
-                        average_index += people_count_list[self.half_num(temp_people_num) - 1 + index] * (possibility_correct_list[index] / sum_possibility)
-                    method_utility = sum_possibility - weight * (float(average_index) / self.collecting_deadline)
+                    for index in range(len(probability_correct_list)):
+                        average_index += people_count_list[self.half_num(temp_people_num) - 1 + index] * (probability_correct_list[index] / sum_probability)
+                    method_utility = sum_probability - weight * (float(average_index) / self.collecting_deadline)
                     break
             method_utility_list.append(method_utility)
         return method_utility_list
 
-    def method_utility_list_decideing_by_time_limit_with_uniform_distribution(self, s_possibility, t_possibility, time_limit, weight):
+    def method_utility_list_decideing_by_time_limit_with_uniform_distribution(self, s_probability, t_probability, time_limit, weight):
         method_utility_list = []
         for n in range(self.repeat):
             people_num = self.poisson[n]
-            possibility_correct = (np.random.rand() * t_possibility + s_possibility) / 100
+            probability_correct = (np.random.rand() * t_probability + s_probability) / 100
             when_people_come = self.simulate_when_people_come_list(people_num)
             method_utility = 0
             people_count = 0
             for i in range(len(when_people_come)):
                 if i >= time_limit and people_count >= 1:
-                    method_utility = (1 - self.relative_error_by_majority_vote(people_count, possibility_correct)) - weight * (float(i) / self.collecting_deadline)
+                    method_utility = (1 - self.relative_error_by_majority_vote(people_count, probability_correct)) - weight * (float(i) / self.collecting_deadline)
                     break
                 if when_people_come[i] == 0: continue
                 people_count += 1
             method_utility_list.append(method_utility)
         return method_utility_list
 
-    def deciding_by_first_person_average_with_uniform_distribution(self, s_possibility, t_possibility, weight):
-        method_utility_list = self.method_utility_list_decideing_by_first_person_with_uniform_distribution(s_possibility, t_possibility, weight)
+    def deciding_by_first_person_average_with_uniform_distribution(self, s_probability, t_probability, weight):
+        method_utility_list = self.method_utility_list_decideing_by_first_person_with_uniform_distribution(s_probability, t_probability, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
-    def deciding_by_majority_vote_average_with_uniform_distribution(self, s_possibility, t_possibility, majority_vote_people, weight):
-        method_utility_list = self.method_utility_list_decideing_by_majority_vote_with_uniform_distribution(s_possibility, t_possibility, majority_vote_people, weight)
+    def deciding_by_majority_vote_average_with_uniform_distribution(self, s_probability, t_probability, majority_vote_people, weight):
+        method_utility_list = self.method_utility_list_decideing_by_majority_vote_with_uniform_distribution(s_probability, t_probability, majority_vote_people, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
-    def deciding_by_half_opinion_average_with_uniform_distribution(self, s_possibility, t_possibility, temp_people_num, weight):
-        method_utility_list = self.method_utility_list_decideing_by_half_opinion_with_uniform_distribution(s_possibility, t_possibility, temp_people_num, weight)
+    def deciding_by_half_opinion_average_with_uniform_distribution(self, s_probability, t_probability, temp_people_num, weight):
+        method_utility_list = self.method_utility_list_decideing_by_half_opinion_with_uniform_distribution(s_probability, t_probability, temp_people_num, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
-    def deciding_by_time_limit_average_with_uniform_distribution(self, s_possibility, t_possibility, time_limit, weight):
-        method_utility_list = self.method_utility_list_decideing_by_time_limit_with_uniform_distribution(s_possibility, t_possibility, time_limit, weight)
+    def deciding_by_time_limit_average_with_uniform_distribution(self, s_probability, t_probability, time_limit, weight):
+        method_utility_list = self.method_utility_list_decideing_by_time_limit_with_uniform_distribution(s_probability, t_probability, time_limit, weight)
         average_method_utility = np.mean(method_utility_list)
         return average_method_utility
 
-    def deciding_by_first_person_variance_with_uniform_distribution(self, s_possibility, t_possibility, weight):
-        method_utility_list = self.method_utility_list_decideing_by_first_person_with_uniform_distribution(s_possibility, t_possibility, weight)
+    def deciding_by_first_person_variance_with_uniform_distribution(self, s_probability, t_probability, weight):
+        method_utility_list = self.method_utility_list_decideing_by_first_person_with_uniform_distribution(s_probability, t_probability, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
 
-    def deciding_by_majority_vote_variance_with_uniform_distribution(self, s_possibility, t_possibility, majority_vote_people, weight):
-        method_utility_list = self.method_utility_list_decideing_by_majority_vote_with_uniform_distribution(s_possibility, t_possibility, majority_vote_people, weight)
+    def deciding_by_majority_vote_variance_with_uniform_distribution(self, s_probability, t_probability, majority_vote_people, weight):
+        method_utility_list = self.method_utility_list_decideing_by_majority_vote_with_uniform_distribution(s_probability, t_probability, majority_vote_people, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
 
-    def deciding_by_half_opinion_variance_with_uniform_distribution(self, s_possibility, t_possibility, temp_people_num, weight):
-        method_utility_list = self.method_utility_list_decideing_by_half_opinion_with_uniform_distribution(s_possibility, t_possibility, temp_people_num, weight)
+    def deciding_by_half_opinion_variance_with_uniform_distribution(self, s_probability, t_probability, temp_people_num, weight):
+        method_utility_list = self.method_utility_list_decideing_by_half_opinion_with_uniform_distribution(s_probability, t_probability, temp_people_num, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
 
-    def deciding_by_time_limit_variance_with_uniform_distribution(self, s_possibility, t_possibility, time_limit, weight):
-        method_utility_list = self.method_utility_list_decideing_by_time_limit_with_uniform_distribution(s_possibility, t_possibility, time_limit, weight)
+    def deciding_by_time_limit_variance_with_uniform_distribution(self, s_probability, t_probability, time_limit, weight):
+        method_utility_list = self.method_utility_list_decideing_by_time_limit_with_uniform_distribution(s_probability, t_probability, time_limit, weight)
         variance_method_utility = np.var(method_utility_list)
         return variance_method_utility
 
@@ -271,13 +271,30 @@ class Modeling:
     # Poisson過程
     # 単位時間あたりの到着数 λ
     # 時刻tまでにn人が到着する確率
-    def poisson_possibility(self, n, t, lambda_poisson):
+    def poisson_probability(self, n, t, lambda_poisson):
         return math.e**(-lambda_poisson * t) * (lambda_poisson * t)**n / math.factorial(n)
+
+    # Poisson過程
+    # 累積確率
+    def cumulative_poisson_probability(self, n, t, lambda_poisson):
+        cumulative_probability = 0
+        for i in range(0, n + 1):
+            cumulative_probability += math.e**(-lambda_poisson * t) * (lambda_poisson * t)**i / math.factorial(i)
+        return cumulative_probability
 
     # Gamma分布
     # 時刻tにn人目が到着する確率
-    def gamma_possibility(self, n, t, lambda_poisson):
+    def gamma_probability(self, n, t, lambda_poisson):
         return lambda_poisson**n * t**(n - 1) * math.e**(-lambda_poisson * t) / math.factorial(n - 1)
+
+    # TODO: バグあり。必要になったら実装
+    # Gamma分布
+    # 累積確率
+    def cumulative_gamma_probability(self, n, t, lambda_poisson):
+        cumulative_probability = 0
+        for i in range(1, n + 1):
+            cumulative_probability += lambda_poisson**i * t**(i - 1) * math.e**(-lambda_poisson * t) / math.factorial(i - 1)
+        return cumulative_probability
 
     # 多数決による判定精度
     # n人で多数決を行う場合の判定精度をacc(n)で表す
@@ -312,8 +329,8 @@ class Modeling:
         if t == 0: return 0
         utility = 0
         for i in range(1, lambda_poisson * t, 1):
-            utility += self.poisson_possibility(2 * i - 1, t, lambda_poisson) * self.acc_odd(2 * i - 1, p)
-            utility += self.poisson_possibility(2 * i, t, lambda_poisson) * self.acc_even(2 * i, p)
+            utility += self.poisson_probability(2 * i - 1, t, lambda_poisson) * self.acc_odd(2 * i - 1, p)
+            utility += self.poisson_probability(2 * i, t, lambda_poisson) * self.acc_even(2 * i, p)
         utility -= w * t
         return utility
 
@@ -331,7 +348,7 @@ class Modeling:
         utility = 0
         utility += self.acc(n, p)
         # 積分を行う
-        value, abserr = integrate.quad(lambda t: w * t * self.gamma_possibility(n, t, lambda_poisson), 0, 1000)
+        value, abserr = integrate.quad(lambda t: w * t * self.gamma_probability(n, t, lambda_poisson), 0, 1000)
         utility -= value
         return utility
 
@@ -342,10 +359,10 @@ class Modeling:
         if k == 0: return 0
         utility = 0
         for j in range(k, 2 * k):
-            temp_possibility = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
+            temp_probability = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
             # 積分を行う
-            value, abserr = integrate.quad(lambda t: w * t * self.gamma_possibility(j, t, lambda_poisson), 0, 1000)
-            utility += temp_possibility * (1 - value)
+            value, abserr = integrate.quad(lambda t: w * t * self.gamma_probability(j, t, lambda_poisson), 0, 1000)
+            utility += temp_probability * (1 - value)
         return utility
 
     # 3, 組み合わせ意見集約法
@@ -364,13 +381,13 @@ class Modeling:
         if n == 0: return 0
         utility = 0
         for i in range(0, n):
-            utility += self.poisson_possibility(i, t1, lambda_poisson) * (self.acc(i, p) - w * t1)
+            utility += self.poisson_probability(i, t1, lambda_poisson) * (self.acc(i, p) - w * t1)
         # 積分を行う
-        value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_possibility(n, t, lambda_poisson), 0, t1)
+        value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, t1)
         utility += value
         # 以下は必要か不明(おそらく不要)
         # for i in range(n + 1, 100):
-        #     utility += self.poisson_possibility(i, t1, lambda_poisson) * (self.acc(n, p) - w * t1)
+        #     utility += self.poisson_probability(i, t1, lambda_poisson) * (self.acc(n, p) - w * t1)
         return utility
 
     # 増減を調べる
@@ -385,17 +402,17 @@ class Modeling:
         if n == 0: return 0
         utility = 0
         for i in range(0, n):
-            utility += self.poisson_possibility(i, t2, lambda_poisson) * (self.acc(i, p) - w * t2)
+            utility += self.poisson_probability(i, t2, lambda_poisson) * (self.acc(i, p) - w * t2)
         # 積分を行う
-        value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_possibility(n, t, lambda_poisson), 0, t1)
+        value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, t1)
         utility += value
         return utility
 
     # def integrand_for_method4(self, t):
     #     integrand = 0
     #     for j in range(k, 2 * k):
-    #         temp_possibility = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
-    #         integrand += self.gamma_possibility(j, t, lambda_poisson) * temp_possibility * (1 - w * t)
+    #         temp_probability = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
+    #         integrand += self.gamma_probability(j, t, lambda_poisson) * temp_probability * (1 - w * t)
     #     return integrand
 
 
@@ -408,19 +425,15 @@ class Modeling:
         def integrand_for_method4(t):
             integrand = 0
             for j in range(k, 2 * k):
-                temp_possibility = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
-                integrand += self.gamma_possibility(j, t, lambda_poisson) * temp_possibility * (1 - w * t)
+                temp_probability = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
+                integrand += self.gamma_probability(j, t, lambda_poisson) * temp_probability * (1 - w * t)
             return integrand
         # --------終わり--------
         for i in range(0, k):
             for j in range(i, 2 * i):
-                temp_possibility = scm.comb(j - 1, j - i) * p**(i - 1) * (1 - p)**(j - i) * p
-                utility += self.poisson_possibility(i, t1, lambda_poisson) * temp_possibility * (1 - w * t1)
+                temp_probability = scm.comb(j - 1, j - i) * p**(i - 1) * (1 - p)**(j - i) * p
+                utility += self.poisson_probability(i, t1, lambda_poisson) * temp_probability * (1 - w * t1)
         #積分を行う
         value, abserr = integrate.quad(integrand_for_method4, 0, t1)
         utility += value
-        return utility
-
-
-
         return utility
