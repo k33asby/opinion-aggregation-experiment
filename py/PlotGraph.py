@@ -400,6 +400,17 @@ class PlotGraph:
         plt.plot(x_axis, y_axis)
         plt.show()
 
+    def plot_g(self, T, n, lambda_poisson):
+        x_axis = np.linspace(0, T, T + 1)
+        y_axis = []
+        for x in x_axis:
+            y_axis.append(m.g(n, x, T, lambda_poisson))
+        plt.title("g T: {0} n: {1} lambda: {2}".format(T, n, lambda_poisson))
+        plt.xlabel('time')
+        plt.ylabel('probability')
+        plt.plot(x_axis, y_axis)
+        plt.show()
+
     def plot_time_priority(self, w, p, lambda_poisson):
         x_axis = np.linspace(0, 50, 51)
         y_axis = [m.time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]

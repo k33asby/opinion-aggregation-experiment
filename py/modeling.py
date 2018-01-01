@@ -296,6 +296,10 @@ class Modeling:
             cumulative_probability += lambda_poisson**i * t**(i - 1) * math.e**(-lambda_poisson * t) / math.factorial(i - 1)
         return cumulative_probability
 
+    # 時刻Tまでにn人現われるときに，時刻t(≤ T)にn人目が到着する(時刻tからTの間には一人も現われない)確率g(n,t,T)
+    def g(self, n, t, T, lambda_poisson):
+        return (lambda_poisson * t)**(n - 1) * math.e**(-1 * lambda_poisson * T) / math.factorial(n - 1)
+
     # 多数決による判定精度
     # n人で多数決を行う場合の判定精度をacc(n)で表す
     # 個人の判定精度をpとする
