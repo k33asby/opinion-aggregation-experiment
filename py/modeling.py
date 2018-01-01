@@ -394,6 +394,16 @@ class Modeling:
         #     utility += self.poisson_probability(i, t1, lambda_poisson) * (self.acc(n, p) - w * t1)
         return utility
 
+    def method2_using_g(self, t1, n, w, p, lambda_poisson):
+        if n == 0: return 0
+        utility = 0
+        for i in range(0, n):
+            utility += self.poisson_probability(i, t1, lambda_poisson) * (self.acc(i, p) - w * t1)
+        # 積分を行う
+        value, abserr = integrate.quad(lambda t: (self.acc(n,p) - w * t) * self.g(n, t, t1, lambda_poisson), 0, t1)
+        utility += value
+        return utility
+
     # 増減を調べる
     def inc_and_dec_time_method2(self, t1, w, p, lambda_poisson):
         for n in range(1, 50):

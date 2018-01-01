@@ -456,6 +456,15 @@ class PlotGraph:
         plt.plot(x_axis, y_axis)
         plt.show()
 
+    def plot_method2_using_g(self, t1, w, p, lambda_poisson):
+        x_axis = np.linspace(0, 50, 51)
+        y_axis = [m.method2_using_g(t1,int(x), w, p, lambda_poisson) for x in x_axis]
+        plt.title('method2 T1: {0} weight: {1} person_probability: {2}'.format(t1, w, p))
+        plt.xlabel('poll people')
+        plt.ylabel('utility')
+        plt.plot(x_axis, y_axis)
+        plt.show()
+
     def plot_method3(self, t1, t2, w, p, lambda_poisson):
         x_axis = np.linspace(0, 50, 51)
         y_axis = [m.method3(t1, t2, int(x), w, p, lambda_poisson) for x in x_axis]
