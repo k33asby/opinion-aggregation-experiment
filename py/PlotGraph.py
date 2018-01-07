@@ -456,23 +456,23 @@ class PlotGraph:
         plt.plot(x_axis, y_axis)
         plt.show()
 
-    def plot_method2_using_g(self, T1, w, p, lambda_poisson):
-        x_axis = np.linspace(0, 50, 51)
-        y_axis = [m.method2_using_g(T1,int(x), w, p, lambda_poisson) for x in x_axis]
-        plt.title('method2 using g T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
-        plt.xlabel('poll people')
-        plt.ylabel('utility')
-        plt.plot(x_axis, y_axis)
-        plt.show()
-
-    def plot_method2_using_trial_g(self, T1, w, p, lambda_poisson):
-        x_axis = np.linspace(0, 50, 51)
-        y_axis = [m.method2_using_trail_g(T1,int(x), w, p, lambda_poisson) for x in x_axis]
-        plt.title('method2 using trial_g T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
-        plt.xlabel('poll people')
-        plt.ylabel('utility')
-        plt.plot(x_axis, y_axis)
-        plt.show()
+    # def plot_method2_using_g(self, T1, w, p, lambda_poisson):
+    #     x_axis = np.linspace(0, 50, 51)
+    #     y_axis = [m.method2_using_g(T1,int(x), w, p, lambda_poisson) for x in x_axis]
+    #     plt.title('method2 using g T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
+    #     plt.xlabel('poll people')
+    #     plt.ylabel('utility')
+    #     plt.plot(x_axis, y_axis)
+    #     plt.show()
+    #
+    # def plot_method2_using_trial_g(self, T1, w, p, lambda_poisson):
+    #     x_axis = np.linspace(0, 50, 51)
+    #     y_axis = [m.method2_using_trail_g(T1,int(x), w, p, lambda_poisson) for x in x_axis]
+    #     plt.title('method2 using trial_g T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
+    #     plt.xlabel('poll people')
+    #     plt.ylabel('utility')
+    #     plt.plot(x_axis, y_axis)
+    #     plt.show()
 
     def plot_method3(self, T1, t2, w, p, lambda_poisson):
         x_axis = np.linspace(0, 50, 51)

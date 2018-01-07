@@ -396,30 +396,28 @@ class Modeling:
         # 積分を行う
         value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T1)
         utility += value
-        # 以下は必要か不明(おそらく不要)
-        # for i in range(n + 1, 100):
-        #     utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(n, p) - w * T1)
         return utility
 
-    def method2_using_g(self, T1, n, w, p, lambda_poisson):
-        if n == 0: return 0
-        utility = 0
-        for i in range(0, n):
-            utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
-        # 積分を行う
-        value, abserr = integrate.quad(lambda t: (self.acc(n,p) - w * t) * self.g(n, t, T1, lambda_poisson), 0, T1)
-        utility += value
-        return utility
-
-    def method2_using_trail_g(self, T1, n, w, p, lambda_poisson):
-        if n == 0: return 0
-        utility = 0
-        for i in range(0, n):
-            utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
-        # 積分を行う
-        value, abserr = integrate.quad(lambda t: (self.acc(n,p) - w * t) * self.trial_g(n, t, T1, lambda_poisson), 0, T1)
-        utility += value
-        return utility
+    # 1/2の資料にはこちらが正しいと書いてあったが、実は12月の資料のほうが正しかった模様、、、
+    # def method2_using_g(self, T1, n, w, p, lambda_poisson):
+    #     if n == 0: return 0
+    #     utility = 0
+    #     for i in range(0, n):
+    #         utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
+    #     # 積分を行う
+    #     value, abserr = integrate.quad(lambda t: (self.acc(n,p) - w * t) * self.g(n, t, T1, lambda_poisson), 0, T1)
+    #     utility += value
+    #     return utility
+    #
+    # def method2_using_trail_g(self, T1, n, w, p, lambda_poisson):
+    #     if n == 0: return 0
+    #     utility = 0
+    #     for i in range(0, n):
+    #         utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
+    #     # 積分を行う
+    #     value, abserr = integrate.quad(lambda t: (self.acc(n,p) - w * t) * self.trial_g(n, t, T1, lambda_poisson), 0, T1)
+    #     utility += value
+    #     return utility
 
     # 増減を調べる
     def inc_and_dec_time_method2(self, T1, w, p, lambda_poisson):
@@ -429,15 +427,48 @@ class Modeling:
                 return 2 * n - 1
 
     # 方法3 時刻T2(=< T1)までに投票者数がnに達すれば判定し終了、達しなければT1まで待つ(T2 = T1とすれば方法2と方法3は同じ)
-    def method3(self, T1, t2, n, w, p, lambda_poisson):
+    def trial_method3(self, T1, T2, n, w, p, lambda_poisson):
         if n == 0: return 0
         utility = 0
         for i in range(0, n):
-            utility += self.poisson_probability(i, t2, lambda_poisson) * (self.acc(i, p) - w * t2)
+            utility += self.poisson_probability(i, T2, lambda_poisson) * (self.acc(i, p) - w * T2)
         # 積分を行う
         value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T1)
         utility += value
         return utility
+
+    # 1/2資料による実装(間違えているのでは、、、)
+    # def method3(self, T1, T2, n, w, p, lambda_poisson):
+    #     if n == 0: return 0
+    #     utility = 0
+    #     for i in range(0, n):
+    #         utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
+    #     for i in range(n, 100):
+    #         value_1, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.g(i, t, T1, lambda_poisson), 0, T2)
+    #         value_2, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * T1) * self.g(i, t, T1, lambda_poisson), T2, T1)
+    #         utility += value_1
+    #         utility += value_2
+    #     return utility
+
+    # オリジナルのmethod3
+    def method3(self, T1, T2, n, w, p, lambda_poisson):
+        if n == 0: return 0
+        utility = 0
+        for i in range(0, n):
+            utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
+        # 積分を行う
+        value_1, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T2)
+        value_2, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * T1) * self.gamma_probability(n, t, lambda_poisson), T2, T1)
+        utility += value_1
+        utility += value_2
+        return utility
+
+    # 増減を調べる
+    def inc_and_dec_time_method3(self, T1, T2, w, p, lambda_poisson):
+        for n in range(1, 50):
+            diff = self.method3(T1, T2, 2 * n + 1, w, p, lambda_poisson) - self.method3(T1, T2, 2 * n - 1, w, p, lambda_poisson)
+            if diff < 0:
+                return 2 * n - 1
 
     # 方法4 得票者数がkに達すれば判定し終了、達しなければT1まで待つ
     def method4(self, T1, k, w, p, lambda_poisson):
