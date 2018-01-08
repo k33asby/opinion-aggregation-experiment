@@ -437,7 +437,6 @@ class Modeling:
     def method4(self, T1, k, w, p, lambda_poisson):
         if k == 0: return 0
         utility = 0
-        temp_integrand = 0
         for i in range(0, k):
             for j in range(i, 2 * i):
                 utility += self.poisson_probability(j, T1, lambda_poisson) * (scm.comb(j - 1, j - i) * p**(i - 1) * (1 - p)**(j - i) * p) * (1 - w * T1)
