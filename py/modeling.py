@@ -286,13 +286,10 @@ class Modeling:
     def gamma_probability(self, n, t, lambda_poisson):
         return lambda_poisson**n * t**(n - 1) * math.e**(-lambda_poisson * t) / math.factorial(n - 1)
 
-    #　TODO: うまく動かん必要になったら実装
     # Gamma分布
     # 累積確率
-    def cumulative_gamma_probability(self, n, t, lambda_poisson):
-        cumulative_probability = 0
-        for i in range(1, n + 1):
-            cumulative_probability += lambda_poisson**i * t**(i - 1) * math.e**(-lambda_poisson * t) / math.factorial(i - 1)
+    def cumulative_gamma_probability(self, n, T, lambda_poisson):
+        cumulative_probability, abserr = integrate.quad(lambda t: self.gamma_probability(n, t, lambda_poisson), 0, T)
         return cumulative_probability
 
     # 時刻Tまでにn人現われるときに，時刻t(≤ T)にn人目が到着する(時刻tからTの間には一人も現われない)確率g(n,t,T)
