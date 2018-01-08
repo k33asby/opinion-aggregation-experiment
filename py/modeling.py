@@ -423,15 +423,15 @@ class Modeling:
                 return 2 * n - 1
 
     # 方法3 時刻T2(=< T1)までに投票者数がnに達すれば判定し終了、達しなければT1まで待つ(T2 = T1とすれば方法2と方法3は同じ)
-    def trial_method3(self, T1, T2, n, w, p, lambda_poisson):
-        if n == 0: return 0
-        utility = 0
-        for i in range(0, n):
-            utility += self.poisson_probability(i, T2, lambda_poisson) * (self.acc(i, p) - w * T2)
-        # 積分を行う
-        value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T1)
-        utility += value
-        return utility
+    # def trial_method3(self, T1, T2, n, w, p, lambda_poisson):
+    #     if n == 0: return 0
+    #     utility = 0
+    #     for i in range(0, n):
+    #         utility += self.poisson_probability(i, T2, lambda_poisson) * (self.acc(i, p) - w * T2)
+    #     # 積分を行う
+    #     value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T1)
+    #     utility += value
+    #     return utility
 
     # 1/2資料による実装(間違えているのでは、、、)
     # def method3(self, T1, T2, n, w, p, lambda_poisson):
@@ -447,17 +447,36 @@ class Modeling:
     #     return utility
 
     # オリジナルのmethod3
+    # これは確率の和が1.0になる
+    # しかし、n+1人以上くる場合が考慮されていないので不適切である
+    # def method3(self, T1, T2, n, w, p, lambda_poisson):
+    #     if n == 0: return 0
+    #     utility = 0
+    #     for i in range(0, n):
+    #         utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
+    #     # 積分を行う
+    #     value_1, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T2)
+    #     value_2, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * T1) * self.gamma_probability(n, t, lambda_poisson), T2, T1)
+    #     utility += value_1
+    #     utility += value_2
+    #     return utility
+
+    # 正しいと思われるmethod3
     def method3(self, T1, T2, n, w, p, lambda_poisson):
         if n == 0: return 0
         utility = 0
+        # T1までにn人集まらないとき
         for i in range(0, n):
             utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
+        # T1までにn人集まるがT2までにはn人集まらないとき
+        for i in range(n, 100):
+            utility += (self.poisson_probability(i, T1, lambda_poisson) - self.poisson_probability(i, T2, lambda_poisson)) * (self.acc(i, p) - w * T1)
         # 積分を行う
-        value_1, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T2)
-        value_2, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * T1) * self.gamma_probability(n, t, lambda_poisson), T2, T1)
-        utility += value_1
-        utility += value_2
+        # T2までにn人集まるとき
+        value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T2)
+        utility += value
         return utility
+
 
     # 増減を調べる
     def inc_and_dec_time_method3(self, T1, T2, w, p, lambda_poisson):
