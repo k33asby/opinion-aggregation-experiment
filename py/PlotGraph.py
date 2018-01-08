@@ -455,10 +455,10 @@ class PlotGraph:
         plt.plot(x_axis, y_axis)
         plt.show()
 
-    def plot_method3(self, T1, t2, w, p, lambda_poisson):
+    def plot_method3(self, T1, T2, w, p, lambda_poisson):
         x_axis = np.linspace(0, 50, 51)
-        y_axis = [m.method3(T1, t2, int(x), w, p, lambda_poisson) for x in x_axis]
-        plt.title('method3 T1: {0} T2: {1} weight: {2} person_probability: {3}'.format(T1, t2, w, p))
+        y_axis = [m.method3(T1, T2, int(x), w, p, lambda_poisson) for x in x_axis]
+        plt.title('method3 T1: {0} T2: {1} weight: {2} person_probability: {3}'.format(T1, T2, w, p))
         plt.xlabel('poll people')
         plt.ylabel('utility')
         plt.plot(x_axis, y_axis)
@@ -467,8 +467,17 @@ class PlotGraph:
     def plot_method4(self, T1, w, p, lambda_poisson):
         x_axis = np.linspace(0, 50, 51)
         y_axis = [m.method4(T1,int(x), w, p, lambda_poisson) for x in x_axis]
-        plt.title('method2 T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
+        plt.title('method4 T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
         plt.xlabel('require vote people')
+        plt.ylabel('utility')
+        plt.plot(x_axis, y_axis)
+        plt.show()
+
+    def plot_method5(self, T1, T2, w, p, lambda_poisson):
+        x_axis = np.linspace(0, 50, 51)
+        y_axis = [m.method5(T1, T2, int(x), w, p, lambda_poisson) for x in x_axis]
+        plt.title('method5 T1: {0} T2: {1} weight: {2} person_probability: {3}'.format(T1, T2, w, p))
+        plt.xlabel('poll people')
         plt.ylabel('utility')
         plt.plot(x_axis, y_axis)
         plt.show()

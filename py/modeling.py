@@ -451,3 +451,28 @@ class Modeling:
         value, abserr = integrate.quad(integrand_for_method4, 0, T1)
         utility += value
         return utility
+
+    # 方法5 時間T2(=< T1)までに得票者数がkに達すれば判定を終了し、達しなければT1まで待つ (T2 = T1とすれば方法4と方法5は同じ)
+    def method5(self, T1, T2, k, w, p, lambda_poisson):
+        if k == 0: return 0
+        utility = 0
+        # T1までにk票集まらないとき
+        for i in range(0, k):
+            for j in range(i, 2 * i):
+                utility += self.poisson_probability(j, T1, lambda_poisson) * (scm.comb(j - 1, j - i) * p**(i - 1) * (1 - p)**(j - i) * p) * (1 - w * T1)
+        # T1までにk票集まるがT2までにはk票集まらないとき
+        for i in range(k, 100):
+            for j in range(i, 2 * i):
+                utility += (self.poisson_probability(i, T1, lambda_poisson) - self.poisson_probability(i, T2, lambda_poisson)) * (scm.comb(j - 1, j - i) * p**(i - 1) * (1 - p)**(j - i) * p) * (1 - w * T1)
+        # 積分を行う
+        # T2までにk票集まるとき
+        # ----被積分関数を定義----
+        def integrand_for_method5(t):
+            integrand = 0
+            for j in range(k, 2 * k):
+                integrand += (scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p) * (1 - w * t) * self.gamma_probability(j, t, lambda_poisson)
+            return integrand
+        # --------終わり--------
+        value, abserr = integrate.quad(integrand_for_method5, 0, T2)
+        utility += value
+        return utility
