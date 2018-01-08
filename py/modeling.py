@@ -336,9 +336,8 @@ class Modeling:
     def time_priority_method(self, t, w, p, lambda_poisson):
         if t == 0: return 0
         utility = 0
-        for i in range(1, lambda_poisson * t, 1):
-            utility += self.poisson_probability(2 * i - 1, t, lambda_poisson) * self.acc_odd(2 * i - 1, p)
-            utility += self.poisson_probability(2 * i, t, lambda_poisson) * self.acc_even(2 * i, p)
+        for i in range(1, 2 * lambda_poisson * t, 1):
+                utility += self.poisson_probability(i, t, lambda_poisson) * self.acc(i, p)
         utility -= w * t
         return utility
 
