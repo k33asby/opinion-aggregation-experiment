@@ -388,17 +388,16 @@ class PlotGraph:
         plt.plot(x_axis, y_axis)
         plt.show()
 
-#　　　TODO: うまく動かん必要になったら実装
-#     def plot_cumulative_gamma(self, people, lambda_poisson):
-#         x_axis = np.linspace(0, 2 * people / lambda_poisson , 2 * people / lambda_poisson + 1)
-#         y_axis = []
-#         for x in x_axis:
-#             y_axis.append(m.cumulative_gamma_probability(people, x, lambda_poisson))
-#         plt.title('cumulative gamma people: {0} lambda: {1}'.format(people, lambda_poisson))
-#         plt.xlabel('time')
-#         plt.ylabel('probability')
-#         plt.plot(x_axis, y_axis)
-#         plt.show()
+    def plot_cumulative_gamma(self, people, lambda_poisson):
+        x_axis = np.linspace(0, 2 * people / lambda_poisson , 2 * people / lambda_poisson + 1)
+        y_axis = []
+        for x in x_axis:
+            y_axis.append(m.cumulative_gamma_probability(people, x, lambda_poisson))
+        plt.title('cumulative gamma people: {0} lambda: {1}'.format(people, lambda_poisson))
+        plt.xlabel('time')
+        plt.ylabel('probability')
+        plt.plot(x_axis, y_axis)
+        plt.show()
 
     def plot_g(self, T, n, lambda_poisson):
         x_axis = np.linspace(0, T, T + 1)
@@ -431,8 +430,8 @@ class PlotGraph:
 
     def plot_vote_priority(self, w, p, lambda_poisson):
         x_axis = np.linspace(0, 50, 51)
-        y_axis = [m.poll_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
-        plt.title('voge priority method weight: {0} person_probability: {1}'.format(w, p))
+        y_axis = [m.vote_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+        plt.title('vote priority method weight: {0} person_probability: {1}'.format(w, p))
         plt.xlabel('require vote people')
         plt.ylabel('utility')
         plt.plot(x_axis, y_axis)
@@ -455,24 +454,6 @@ class PlotGraph:
         plt.ylabel('utility')
         plt.plot(x_axis, y_axis)
         plt.show()
-
-    # def plot_method2_using_g(self, T1, w, p, lambda_poisson):
-    #     x_axis = np.linspace(0, 50, 51)
-    #     y_axis = [m.method2_using_g(T1,int(x), w, p, lambda_poisson) for x in x_axis]
-    #     plt.title('method2 using g T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
-    #     plt.xlabel('poll people')
-    #     plt.ylabel('utility')
-    #     plt.plot(x_axis, y_axis)
-    #     plt.show()
-    #
-    # def plot_method2_using_trial_g(self, T1, w, p, lambda_poisson):
-    #     x_axis = np.linspace(0, 50, 51)
-    #     y_axis = [m.method2_using_trail_g(T1,int(x), w, p, lambda_poisson) for x in x_axis]
-    #     plt.title('method2 using trial_g T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
-    #     plt.xlabel('poll people')
-    #     plt.ylabel('utility')
-    #     plt.plot(x_axis, y_axis)
-    #     plt.show()
 
     def plot_method3(self, T1, t2, w, p, lambda_poisson):
         x_axis = np.linspace(0, 50, 51)

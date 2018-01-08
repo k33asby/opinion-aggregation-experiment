@@ -296,14 +296,6 @@ class Modeling:
     def g(self, n, t, T, lambda_poisson):
         return lambda_poisson**n * t**(n - 1) * math.e**(-lambda_poisson * T) / math.factorial(n - 1)
 
-    # 試験的なメソッドg
-    def trial_g(self, n, t, T, lambda_poisson):
-        p_sum = 0
-        for i in range(0, n):
-            p_sum += m.poisson_probability(i, T, lambda_poisson)
-        return self.g(n, t, T, lambda_poisson) / self.poisson_probability(n, T, lambda_poisson) * (1 - p_sum)
-
-
     # 多数決による判定精度
     # n人で多数決を行う場合の判定精度をacc(n)で表す
     # 個人の判定精度をpとする
@@ -359,6 +351,12 @@ class Modeling:
         utility -= value
         return utility
 
+    # 増減を調べる
+    def inc_and_dec_poll_priority_method(self, w, p, lambda_poisson):
+        for n in range(1, 1000):
+            diff = self.poll_priority_method(2 * n + 1, w, p, lambda_poisson) - self.poll_priority_method(2 * n - 1, w, p, lambda_poisson)
+            if diff < 0: return n
+
     # 2.3, 得票数優先意見集約法
     # 先にk票集まった案に決定する
     # 効用を予測精度と所要時間の差で表す
@@ -372,6 +370,12 @@ class Modeling:
             utility += temp_probability * (1 - value)
         return utility
 
+    # 増減を調べる
+    def inc_and_dec_vote_priority_method(self, w, p, lambda_poisson):
+        for k in range(1, 1000):
+            diff = self.vote_priority_method(k + 1, w, p, lambda_poisson) - self.vote_priority_method(k, w, p, lambda_poisson)
+            if diff < 0: return k
+
     # 3, 組み合わせ意見集約法
     # 方法1, 時刻T1まで待つ
     # 方法2, 投票者数がnに達すれば判定し終了、達しなければT1まで待つ
@@ -382,6 +386,10 @@ class Modeling:
     # 方法1(時刻優先意見集約法と同じ) 時刻T1まで待つ
     def method1(self, t, w, p, lambda_poisson):
         return self.time_priority_method(t, w, p, lambda_poisson)
+
+    # 増減を調べる
+    def inc_and_dec_method1(self, w, p, lambda_poisson):
+        return self.inc_and_dec_time_priority_method(w, p, lambda_poisson)
 
     # 方法2 投票者数がnに達すれば判定し終了、達しなければT1まで待つ
     def method2(self, T1, n, w, p, lambda_poisson):
@@ -394,74 +402,14 @@ class Modeling:
         utility += value
         return utility
 
-    # 1/2の資料にはこちらが正しいと書いてあったが、実は12月の資料のほうが正しかった模様、、、
-    # def method2_using_g(self, T1, n, w, p, lambda_poisson):
-    #     if n == 0: return 0
-    #     utility = 0
-    #     for i in range(0, n):
-    #         utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
-    #     # 積分を行う
-    #     value, abserr = integrate.quad(lambda t: (self.acc(n,p) - w * t) * self.g(n, t, T1, lambda_poisson), 0, T1)
-    #     utility += value
-    #     return utility
-    #
-    # def method2_using_trail_g(self, T1, n, w, p, lambda_poisson):
-    #     if n == 0: return 0
-    #     utility = 0
-    #     for i in range(0, n):
-    #         utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
-    #     # 積分を行う
-    #     value, abserr = integrate.quad(lambda t: (self.acc(n,p) - w * t) * self.trial_g(n, t, T1, lambda_poisson), 0, T1)
-    #     utility += value
-    #     return utility
-
     # 増減を調べる
-    def inc_and_dec_time_method2(self, T1, w, p, lambda_poisson):
+    def inc_and_dec_method2(self, T1, w, p, lambda_poisson):
         for n in range(1, 50):
             diff = self.method2(T1, 2 * n + 1, w, p, lambda_poisson) - self.method2(T1, 2 * n - 1, w, p, lambda_poisson)
             if diff < 0:
                 return 2 * n - 1
 
     # 方法3 時刻T2(=< T1)までに投票者数がnに達すれば判定し終了、達しなければT1まで待つ(T2 = T1とすれば方法2と方法3は同じ)
-    # def trial_method3(self, T1, T2, n, w, p, lambda_poisson):
-    #     if n == 0: return 0
-    #     utility = 0
-    #     for i in range(0, n):
-    #         utility += self.poisson_probability(i, T2, lambda_poisson) * (self.acc(i, p) - w * T2)
-    #     # 積分を行う
-    #     value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T1)
-    #     utility += value
-    #     return utility
-
-    # 1/2資料による実装(間違えているのでは、、、)
-    # def method3(self, T1, T2, n, w, p, lambda_poisson):
-    #     if n == 0: return 0
-    #     utility = 0
-    #     for i in range(0, n):
-    #         utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
-    #     for i in range(n, 100):
-    #         value_1, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.g(i, t, T1, lambda_poisson), 0, T2)
-    #         value_2, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * T1) * self.g(i, t, T1, lambda_poisson), T2, T1)
-    #         utility += value_1
-    #         utility += value_2
-    #     return utility
-
-    # オリジナルのmethod3
-    # これは確率の和が1.0になる
-    # しかし、n+1人以上くる場合が考慮されていないので不適切である
-    # def method3(self, T1, T2, n, w, p, lambda_poisson):
-    #     if n == 0: return 0
-    #     utility = 0
-    #     for i in range(0, n):
-    #         utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
-    #     # 積分を行う
-    #     value_1, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T2)
-    #     value_2, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * T1) * self.gamma_probability(n, t, lambda_poisson), T2, T1)
-    #     utility += value_1
-    #     utility += value_2
-    #     return utility
-
-    # 正しいと思われるmethod3
     def method3(self, T1, T2, n, w, p, lambda_poisson):
         if n == 0: return 0
         utility = 0
@@ -479,7 +427,7 @@ class Modeling:
 
 
     # 増減を調べる
-    def inc_and_dec_time_method3(self, T1, T2, w, p, lambda_poisson):
+    def inc_and_dec_method3(self, T1, T2, w, p, lambda_poisson):
         for n in range(1, 50):
             diff = self.method3(T1, T2, 2 * n + 1, w, p, lambda_poisson) - self.method3(T1, T2, 2 * n - 1, w, p, lambda_poisson)
             if diff < 0:
@@ -490,18 +438,16 @@ class Modeling:
         if k == 0: return 0
         utility = 0
         temp_integrand = 0
+        for i in range(0, k):
+            for j in range(i, 2 * i):
+                utility += self.poisson_probability(j, T1, lambda_poisson) * (scm.comb(j - 1, j - i) * p**(i - 1) * (1 - p)**(j - i) * p) * (1 - w * T1)
         # ----被積分関数を定義----
         def integrand_for_method4(t):
             integrand = 0
             for j in range(k, 2 * k):
-                temp_probability = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
-                integrand += self.gamma_probability(j, t, lambda_poisson) * temp_probability * (1 - w * t)
+                integrand += (scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p) * (1 - w * t) * self.gamma_probability(j, t, lambda_poisson)
             return integrand
         # --------終わり--------
-        for i in range(0, k):
-            for j in range(i, 2 * i):
-                temp_probability = scm.comb(j - 1, j - i) * p**(i - 1) * (1 - p)**(j - i) * p
-                utility += self.poisson_probability(i, T1, lambda_poisson) * temp_probability * (1 - w * T1)
         #積分を行う
         value, abserr = integrate.quad(integrand_for_method4, 0, T1)
         utility += value
