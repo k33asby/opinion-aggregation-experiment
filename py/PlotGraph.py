@@ -1,8 +1,8 @@
-class PlotGraph:
+class plotGraph:
 
     def __init__(self, lambda_poisson, repeat):
         sns.set_style("whitegrid")
-        self.model = Modeling(lambda_poisson, repeat)
+        self.model = modeling(lambda_poisson, repeat)
 
     # 縦軸を誤差率、横軸を個人の正解率
     def plot_error_probability_graph(self, people_num):

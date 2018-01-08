@@ -1,4 +1,4 @@
-class Modeling:
+class modeling:
 
     def __init__(self,lambda_poisson, repeat):
         self.lambda_poisson = lambda_poisson
@@ -355,7 +355,7 @@ class Modeling:
     def inc_and_dec_poll_priority_method(self, w, p, lambda_poisson):
         for n in range(1, 1000):
             diff = self.poll_priority_method(2 * n + 1, w, p, lambda_poisson) - self.poll_priority_method(2 * n - 1, w, p, lambda_poisson)
-            if diff < 0: return n
+            if diff < 0: return 2 * n - 1
 
     # 2.3, 得票数優先意見集約法
     # 先にk票集まった案に決定する
