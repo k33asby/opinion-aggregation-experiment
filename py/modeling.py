@@ -292,9 +292,9 @@ class modeling:
         cumulative_probability, abserr = integrate.quad(lambda t: self.gamma_probability(n, t, lambda_poisson), 0, T)
         return cumulative_probability
 
-    # 時刻Tまでにn人現われるときに，時刻t(≤ T)にn人目が到着する(時刻tからTの間には一人も現われない)確率g(n,t,T)
-    def g(self, n, t, T, lambda_poisson):
-        return lambda_poisson**n * t**(n - 1) * math.e**(-lambda_poisson * T) / math.factorial(n - 1)
+    # 時刻Tまでにn人現われるときに， 時刻t(=< T)にm(=< n)人目が到着する確率g(m,n,t,T)
+    def g(self, m, n, t, T, lambda_poisson):
+        return (lambda_poisson**n / (math.factorial(m - 1) * math.factorial(n - m))) * t**(m - 1) * (T - t)**(n - m) * math.e**(-lambda_poisson * T)
 
     # 多数決による判定精度
     # n人で多数決を行う場合の判定精度をacc(n)で表す
@@ -328,7 +328,7 @@ class modeling:
     def time_priority_method(self, t, w, p, lambda_poisson):
         if t == 0: return 0
         utility = 0
-        for i in range(1, 2 * lambda_poisson * t, 1):
+        for i in range(1, 100):
                 utility += self.poisson_probability(i, t, lambda_poisson) * self.acc(i, p)
         utility -= w * t
         return utility
@@ -410,6 +410,8 @@ class modeling:
                 return 2 * n - 1
 
     # 方法3 時刻T2(=< T1)までに投票者数がnに達すれば判定し終了、達しなければT1まで待つ(T2 = T1とすれば方法2と方法3は同じ)
+
+    # 違うな、、、
     def method3(self, T1, T2, n, w, p, lambda_poisson):
         if n == 0: return 0
         utility = 0
@@ -423,6 +425,33 @@ class modeling:
         # T2までにn人集まるとき
         value, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T2)
         utility += value
+        return utility
+
+    # 1/2資料による実装
+    def method3(self, T1, T2, n, w, p, lambda_poisson):
+        if n == 0: return 0
+        utility = 0
+        for i in range(0, n):
+            utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
+        for i in range(n, 100):
+            value_1, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.g(i, t, T1, lambda_poisson), 0, T2)
+            value_2, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * T1) * self.g(i, t, T1, lambda_poisson), T2, T1)
+            utility += value_1
+            utility += value_2
+        return utility
+
+    # これは確率の和が1.0になる
+    # しかし、n+1人以上くる場合が考慮されていないので不適切である
+    def method3(self, T1, T2, n, w, p, lambda_poisson):
+        if n == 0: return 0
+        utility = 0
+        for i in range(0, n):
+            utility += self.poisson_probability(i, T1, lambda_poisson) * (self.acc(i, p) - w * T1)
+        # 積分を行う
+        value_1, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * t) * self.gamma_probability(n, t, lambda_poisson), 0, T2)
+        value_2, abserr = integrate.quad(lambda t: (self.acc(n, p) - w * T1) * self.gamma_probability(n, t, lambda_poisson), T2, T1)
+        utility += value_1
+        utility += value_2
         return utility
 
 
