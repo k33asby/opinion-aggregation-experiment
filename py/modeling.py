@@ -364,10 +364,11 @@ class modeling:
         if k == 0: return 0
         utility = 0
         for j in range(k, 2 * k):
-            temp_probability = scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p
             # 積分を行う
-            value, abserr = integrate.quad(lambda t: w * t * self.gamma_probability(j, t, lambda_poisson), 0, 1000)
-            utility += temp_probability * (1 - value)
+            value_1, abserr = integrate.quad(lambda t: (1 -w * t) * self.gamma_probability(j, t, lambda_poisson), 0, 1000)
+            utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * value_1
+            value_2, abserr = integrate.quad(lambda t: (0 - w * t) * self.gamma_probability(j, t, lambda_poisson), 0, 1000)
+            utility += scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * value_2
         return utility
 
     # 増減を調べる
@@ -434,20 +435,31 @@ class modeling:
     def method4(self, T1, k, w, p, lambda_poisson):
         if k == 0: return 0
         utility = 0
-        for i in range(0, k):
-            for j in range(i, 2 * i):
-                utility += self.poisson_probability(j, T1, lambda_poisson) * (scm.comb(j - 1, j - i) * p**(i - 1) * (1 - p)**(j - i) * p) * (1 - w * T1)
-        # ----被積分関数を定義----
-        def integrand_for_method4(t):
-            integrand = 0
-            for j in range(k, 2 * k):
-                integrand += (scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p) * (1 - w * t) * self.gamma_probability(j, t, lambda_poisson)
-            return integrand
-        # --------終わり--------
-        #積分を行う
-        value, abserr = integrate.quad(integrand_for_method4, 0, T1)
-        utility += value
+        for j in range(k, 2 * k):
+            # 積分を行う
+            value_1, abserr = integrate.quad(lambda t: (1 -w * t) * self.gamma_probability(j, t, lambda_poisson), 0, T1)
+            value_2, abserr = integrate.quad(lambda t: (0 - w * t) * self.gamma_probability(j, t, lambda_poisson), 0, T1)
+            # ----被積分関数を定義----
+            def integrand_for_method4(t):
+                integrand = 0
+                for l in range(0, j):
+                    p_sum = 0
+                    for m in range(0, j):
+                        p_sum += self.poisson_probability(m, T1, lambda_poisson)
+                    integrand += ((self.poisson_probability(l, T1, lambda_poisson) * self.acc(l, p) / p_sum) - w * T1) * self.gamma_probability(j, t, lambda_poisson)
+                return integrand
+            # --------終わり--------
+            value_3, abserr = integrate.quad(integrand_for_method4, T1, 1000)
+            utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (value_1 + value_3)
+            utility += scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * (value_2 + value_3)
         return utility
+
+    # 増減を調べる
+    def inc_and_dec_method4(self, T1, w, p, lambda_poisson):
+        for k in range(1, 50):
+            diff = self.method4(T1, k + 1, w, p, lambda_poisson) - self.method4(T1, k, w, p, lambda_poisson)
+            if diff < 0:
+                return k
 
     # 方法5 時間T2(=< T1)までに得票者数がkに達すれば判定を終了し、達しなければT1まで待つ (T2 = T1とすれば方法4と方法5は同じ)
     def method5(self, T1, T2, k, w, p, lambda_poisson):
