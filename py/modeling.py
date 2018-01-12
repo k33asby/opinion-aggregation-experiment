@@ -271,30 +271,30 @@ class modeling:
     # 単位時間あたりの到着数 λ
     # 時刻tまでにn人が到着する確率
     def poisson_probability(self, n, t, lambda_poisson):
-        return math.e**(-lambda_poisson * t) * (lambda_poisson * t)**n / math.factorial(n)
+        return Decimal(math.e)**(Decimal(-1)*Decimal(lambda_poisson) * Decimal(t)) * (Decimal(lambda_poisson) * Decimal(t))**Decimal(n) / Decimal(math.factorial(Decimal(n)))
 
     # Poisson過程
     # 累積確率
     def cumulative_poisson_probability(self, n, t, lambda_poisson):
-        cumulative_probability = 0
+        cumulative_probability = Decimal(0)
         for i in range(0, n + 1):
-            cumulative_probability += math.e**(-lambda_poisson * t) * (lambda_poisson * t)**i / math.factorial(i)
+            cumulative_probability += Decimal(math.e)**(Decimal(-1)*Decimal(lambda_poisson) * Decimal(t)) * (Decimal(lambda_poisson) * Decimal(t))**Decimal(i) / Decimal(math.factorial(Decimal(i)))
         return cumulative_probability
 
     # Gamma分布
     # 時刻tにn人目が到着する確率
     def gamma_probability(self, n, t, lambda_poisson):
-        return lambda_poisson**n * t**(n - 1) * math.e**(-lambda_poisson * t) / math.factorial(n - 1)
+        return Decimal(lambda_poisson)**Decimal(n) * Decimal(t)**(Decimal(n) - Decimal(1)) * Decimal(math.e)**(Decimal(-1)*Decimal(lambda_poisson) * Decimal(t)) / Decimal(math.factorial(Decimal(n) - Decimal(1)))
 
     # Gamma分布
     # 累積確率
     def cumulative_gamma_probability(self, n, T, lambda_poisson):
-        cumulative_probability, abserr = integrate.quad(lambda t: self.gamma_probability(n, t, lambda_poisson), 0, T)
+        cumulative_probability, abserr = integrate.quad(lambda t: self.gamma_probability(n, t, lambda_poisson), 0, Decimal(T))
         return cumulative_probability
 
     # 時刻Tまでにn人現われるときに， 時刻t(=< T)にm(=< n)人目が到着する確率g(m,n,t,T)
     def g(self, m, n, t, T, lambda_poisson):
-        return (lambda_poisson**n / (math.factorial(m - 1) * math.factorial(n - m))) * t**(m - 1) * (T - t)**(n - m) * math.e**(-lambda_poisson * T)
+        return (Decimal(lambda_poisson)**Decimal(n) / (Decimal(math.factorial(Decimal(m) - Decimal(1))) * Decimal(math.factorial(Decimal(n) - Decimal(m))))) * Decimal(t)**(Decimal(m) - Decimal(1)) * (Decimal(T) - Decimal(t))**(Decimal(n) - Decimal(m)) * Decimal(math.e)**(Decimal(-1) * Decimal(lambda_poisson) * Decimal(T))
 
     # 多数決による判定精度
     # n人で多数決を行う場合の判定精度をacc(n)で表す
@@ -304,7 +304,7 @@ class modeling:
         acc = 0
         for j in range(i):
             acc += scm.comb(2 * i - 1, j) * p**(2 * i - 1 - j) * (1 - p)**j
-        return acc
+        return Decimal(acc)
 
     def acc_even(self, n, p): # nが偶数2iのとき
         i = int(n / 2)
@@ -312,7 +312,7 @@ class modeling:
         for j in range(i):
             acc += scm.comb(2 * i, j) * p**(2 * i - j) * (1 - p)**j
         acc += scm.comb(2 * i, i) * p**i * (1 - p)**i / 2
-        return acc
+        return Decimal(acc)
 
     def acc(self, n, p):
         if n % 2 == 1:
@@ -327,10 +327,10 @@ class modeling:
     # 効用を予測精度と所要時間の差で表す
     def time_priority_method(self, t, w, p, lambda_poisson):
         if t == 0: return 0
-        utility = 0
+        utility = Decimal(0)
         for i in range(1, 100):
                 utility += self.poisson_probability(i, t, lambda_poisson) * self.acc(i, p)
-        utility -= w * t
+        utility -= Decimal(w) * Decimal(t)
         return utility
 
     # 増減を調べる
@@ -344,11 +344,11 @@ class modeling:
     # 効用を予測精度と所要時間の差で表す
     def poll_priority_method(self, n, w, p, lambda_poisson):
         if n == 0: return 0
-        utility = 0
+        utility = Decimal(0)
         utility += self.acc(n, p)
         # 積分を行う
-        value, abserr = integrate.quad(lambda t: w * t * self.gamma_probability(n, t, lambda_poisson), 0, 1000)
-        utility -= value
+        value, abserr = integrate.quad(lambda t: Decimal(w) * Decimal(t) * self.gamma_probability(n, t, lambda_poisson), Decimal(0), Decimal(1000))
+        utility -= Decimal(value)
         return utility
 
     # 増減を調べる
@@ -362,13 +362,13 @@ class modeling:
     # 効用を予測精度と所要時間の差で表す
     def vote_priority_method(self, k, w, p, lambda_poisson):
         if k == 0: return 0
-        utility = 0
+        utility = Decimal(0)
         for j in range(k, 2 * k):
             # 積分を行う
-            value_1, abserr = integrate.quad(lambda t: (1 -w * t) * self.gamma_probability(j, t, lambda_poisson), 0, 1000)
-            utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * value_1
-            value_2, abserr = integrate.quad(lambda t: (0 - w * t) * self.gamma_probability(j, t, lambda_poisson), 0, 1000)
-            utility += scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * value_2
+            value_1, abserr = integrate.quad(lambda t: (Decimal(1) - Decimal(w) * Decimal(t)) * self.gamma_probability(j, t, lambda_poisson), Decimal(0), Decimal(1000))
+            utility += Decimal(scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * value_1)
+            value_2, abserr = integrate.quad(lambda t: (Decimal(0) - Decimal(w) * Decimal(t)) * self.gamma_probability(j, t, lambda_poisson), Decimal(0), Decimal(1000))
+            utility += Decimal(scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * value_2)
         return utility
 
     # 増減を調べる
