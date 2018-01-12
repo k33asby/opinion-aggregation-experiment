@@ -89,4 +89,75 @@ def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
 
 
 
-# グラフをプロットするメソッド
+# ------------グラフをプロットするメソッド------------
+def plot_poisson(time, lambda_poisson):
+    x_axis = np.linspace(0, 2 * time * lambda_poisson, 2 * time * lambda_poisson + 1)
+    y_axis = [poisson_probability(x, time, lambda_poisson) for x in x_axis]
+    plt.title('poisson time: {0} lambda: {1}'.format(time, lambda_poisson))
+    plt.xlabel('people')
+    plt.ylabel('probability')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_cumulative_poisson(time, lambda_poisson):
+    x_axis = np.linspace(0, 2 * time * lambda_poisson, 2 * time * lambda_poisson + 1)
+    y_axis = [cumulative_poisson_probability(int(x), time, lambda_poisson) for x in x_axis]
+    plt.title('cumulative poisson time: {0} lambda: {1}'.format(time, lambda_poisson))
+    plt.xlabel('people')
+    plt.ylabel('probability')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_gamma(people, lambda_poisson):
+    x_axis = np.linspace(0, 2 * people / lambda_poisson , 2 * people / lambda_poisson + 1)
+    y_axis = [gamma_probability(people, x, lambda_poisson) for x in x_axis]
+    plt.title('gamma people: {0} lambda: {1}'.format(people, lambda_poisson))
+    plt.xlabel('time')
+    plt.ylabel('probability')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_cumulative_gamma(people, lambda_poisson):
+    x_axis = np.linspace(0, 2 * people / lambda_poisson , 2 * people / lambda_poisson + 1)
+    y_axis = [cumulative_gamma_probability(people, x, lambda_poisson) for x in x_axis]
+    plt.title('cumulative gamma people: {0} lambda: {1}'.format(people, lambda_poisson))
+    plt.xlabel('time')
+    plt.ylabel('probability')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_g(m, n, T, lambda_poisson):
+    x_axis = np.linspace(0, T, T + 1)
+    y_axis = [g(m, n, x, T, lambda_poisson) for x in x_axis]
+    plt.title("g m: {0} n: {1} T:{2} lambda: {3}".format(m, n, T, lambda_poisson))
+    plt.xlabel('time')
+    plt.ylabel('probability')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_time_priority(w, p, lambda_poisson):
+    x_axis = np.linspace(0, 50, 51)
+    y_axis = [time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('time priority method weight: {0} person_probability: {1}'.format(w, p))
+    plt.xlabel('time')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_poll_priority(w, p, lambda_poisson):
+    x_axis = np.linspace(0, 50, 51)
+    y_axis = [poll_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('poll priority method weight: {0} person_probability: {1}'.format(w, p))
+    plt.xlabel('poll people')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_vote_priority(w, p, lambda_poisson):
+    x_axis = np.linspace(0, 50, 51)
+    y_axis = [vote_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('vote priority method weight: {0} person_probability: {1}'.format(w, p))
+    plt.xlabel('require vote people')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
