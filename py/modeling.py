@@ -271,7 +271,7 @@ class modeling:
     # 単位時間あたりの到着数 λ
     # 時刻tまでにn人が到着する確率
     def poisson_probability(self, n, t, lambda_poisson):
-        return Decimal(math.e)**(Decimal(-1)*Decimal(lambda_poisson) * Decimal(t)) * (Decimal(lambda_poisson) * Decimal(t))**Decimal(n) / Decimal(math.factorial(Decimal(n)))
+        return Decimal(math.e**(-lambda_poisson * t) * (lambda_poisson * t)**n / math.factorial(n))
 
     # Poisson過程
     # 累積確率
