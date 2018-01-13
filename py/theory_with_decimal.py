@@ -3,7 +3,7 @@
 # 単位時間あたりの到着数 λ
 # 時刻tまでにn人が到着する確率
 def poisson_probability(n, t, lambda_poisson):
-    return float(math.e**(-lambda_poisson * t) * (lambda_poisson * t)**n / math.factorial(n))
+    return float(Decimal(math.e)**(-lambda_poisson * Decimal(t)) * (lambda_poisson * Decimal(t))**Decimal(n) / Decimal(math.factorial(n)))
 
 # Gamma分布
 # 時刻tにn人目が到着する確率
