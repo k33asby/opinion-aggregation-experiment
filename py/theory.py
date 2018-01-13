@@ -3,12 +3,12 @@
 # 単位時間あたりの到着数 λ
 # 時刻tまでにn人が到着する確率
 def poisson_probability(n, t, lambda_poisson):
-    return Decimal(math.e)**(Decimal(-1)*Decimal(lambda_poisson) * Decimal(t)) * (Decimal(lambda_poisson) * Decimal(t))**Decimal(n) / Decimal(math.factorial(Decimal(n)))
+    return Decimal(math.e)**(Decimal(-1)*lambda_poisson * Decimal(t)) * (lambda_poisson * Decimal(t))**Decimal(n) / Decimal(math.factorial(Decimal(n)))
 
 # Gamma分布
 # 時刻tにn人目が到着する確率
 def gamma_probability(n, t, lambda_poisson):
-    return Decimal(lambda_poisson)**Decimal(n) * Decimal(t)**(Decimal(n) - Decimal(1)) * Decimal(math.e)**(Decimal(-1)*Decimal(lambda_poisson) * Decimal(t)) / Decimal(math.factorial(Decimal(n) - Decimal(1)))
+    return lambda_poisson**Decimal(n) * Decimal(t)**(Decimal(n) - Decimal(1)) * Decimal(math.e)**(Decimal(-1)*lambda_poisson * Decimal(t)) / Decimal(math.factorial(Decimal(n) - Decimal(1)))
 
 
 # 時刻Tまでにn人現われるときに， 時刻t(=< T)にm(=< n)人目が到着する確率g(m,n,t,T)
@@ -46,7 +46,7 @@ def acc(n, p):
 # 効用を予測精度と所要時間の差で表す
 def time_priority_method(t, w, p, lambda_poisson):
     if t == 0: return 0
-    return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in xrange(1,200)) - (Decimal(w) * Decimal(t))
+    return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in xrange(1,200)) - (w * Decimal(t))
 
 
 # 増減を調べる
@@ -60,7 +60,7 @@ def inc_and_dec_time_priority_method(w, p, lambda_poisson):
 # 効用を予測精度と所要時間の差で表す
 def poll_priority_method(n, w, p, lambda_poisson):
     if n == 0: return 0
-    return acc(n, p) - Decimal(integrate.quad(lambda t: Decimal(w) * Decimal(t) * gamma_probability(n, t, lambda_poisson), Decimal(0), Decimal(1000))[0])
+    return acc(n, p) - Decimal(integrate.quad(lambda t: w *Decimal(t) * gamma_probability(n, t, lambda_poisson), Decimal(0), Decimal(1000))[0])
 
 
 # 増減を調べる
@@ -74,8 +74,8 @@ def inc_and_dec_poll_priority_method(w, p, lambda_poisson):
 # 効用を予測精度と所要時間の差で表す
 def vote_priority_method(k, w, p, lambda_poisson):
     if k == 0: return 0
-    return np.sum((scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * integrate.quad(lambda t: (Decimal(1) - Decimal(w) * Decimal(t)) * gamma_probability(j, t, lambda_poisson), Decimal(0), Decimal(1000))[0]) \
-    + (scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * integrate.quad(lambda t: (Decimal(0) - Decimal(w) * Decimal(t)) * gamma_probability(j, t, lambda_poisson), Decimal(0), Decimal(1000))[0]) for j in xrange(k, 2 * k))
+    value = integrate.quad(lambda t: w * Decimal(t) * gamma_probability(j, t, lambda_poisson), 0, 1000)[0]
+    return np.sum((scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value)) + (scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * -value ) for j in xrange(k, 2 * k))
 
 # 増減を調べる
 def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
@@ -93,28 +93,10 @@ def plot_poisson(time, lambda_poisson):
     plt.plot(x_axis, y_axis)
     plt.show()
 
-def plot_cumulative_poisson(time, lambda_poisson):
-    x_axis = np.linspace(0, 2 * time * lambda_poisson, 2 * time * lambda_poisson + 1)
-    y_axis = [cumulative_poisson_probability(int(x), time, lambda_poisson) for x in x_axis]
-    plt.title('cumulative poisson time: {0} lambda: {1}'.format(time, lambda_poisson))
-    plt.xlabel('people')
-    plt.ylabel('probability')
-    plt.plot(x_axis, y_axis)
-    plt.show()
-
 def plot_gamma(people, lambda_poisson):
     x_axis = np.linspace(0, 2 * people / lambda_poisson , 2 * people / lambda_poisson + 1)
     y_axis = [gamma_probability(people, x, lambda_poisson) for x in x_axis]
     plt.title('gamma people: {0} lambda: {1}'.format(people, lambda_poisson))
-    plt.xlabel('time')
-    plt.ylabel('probability')
-    plt.plot(x_axis, y_axis)
-    plt.show()
-
-def plot_cumulative_gamma(people, lambda_poisson):
-    x_axis = np.linspace(0, 2 * people / lambda_poisson , 2 * people / lambda_poisson + 1)
-    y_axis = [cumulative_gamma_probability(people, x, lambda_poisson) for x in x_axis]
-    plt.title('cumulative gamma people: {0} lambda: {1}'.format(people, lambda_poisson))
     plt.xlabel('time')
     plt.ylabel('probability')
     plt.plot(x_axis, y_axis)
@@ -129,8 +111,8 @@ def plot_g(m, n, T, lambda_poisson):
     plt.plot(x_axis, y_axis)
     plt.show()
 
-def plot_time_priority(w, p, lambda_poisson):
-    x_axis = np.linspace(0, 50, 51)
+def plot_time_priority(w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = []
     y_axis = [time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
     plt.title('time priority method weight: {0} person_probability: {1}'.format(w, p))
@@ -139,8 +121,8 @@ def plot_time_priority(w, p, lambda_poisson):
     plt.plot(x_axis, y_axis)
     plt.show()
 
-def plot_poll_priority(w, p, lambda_poisson):
-    x_axis = np.linspace(0, 50, 51)
+def plot_poll_priority(w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = [poll_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
     plt.title('poll priority method weight: {0} person_probability: {1}'.format(w, p))
     plt.xlabel('poll people')
@@ -148,8 +130,8 @@ def plot_poll_priority(w, p, lambda_poisson):
     plt.plot(x_axis, y_axis)
     plt.show()
 
-def plot_vote_priority(w, p, lambda_poisson):
-    x_axis = np.linspace(0, 50, 51)
+def plot_vote_priority(w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = [vote_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
     plt.title('vote priority method weight: {0} person_probability: {1}'.format(w, p))
     plt.xlabel('require vote people')
