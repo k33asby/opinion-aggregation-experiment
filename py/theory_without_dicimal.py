@@ -3,18 +3,18 @@
 # 単位時間あたりの到着数 λ
 # 時刻tまでにn人が到着する確率
 def poisson_probability(n, t, lambda_poisson):
-    return float(math.e**(-lambda_poisson * t) * (lambda_poisson * t)**n / math.factorial(n))
+    return math.e**(-lambda_poisson * t) * (lambda_poisson * t)**n / math.factorial(n)
 
 # Gamma分布
 # 時刻tにn人目が到着する確率
 def gamma_probability(n, t, lambda_poisson):
-    return float(lambda_poisson**n * Decimal(t)**(n - 1) * Decimal(math.e)**(-lambda_poisson * Decimal(t)) / math.factorial(n - 1))
+    return lambda_poisson**n * t**(n - 1) * math.e**(-lambda_poisson * t) / math.factorial(n - 1)
 
 
 # 時刻Tまでにn人現われるときに， 時刻t(=< T)にm(=< n)人目が到着する確率g(m,n,t,T)
 def g(m, n, t, T, lambda_poisson):
-    return float(lambda_poisson**Decimal(n) / (math.factorial(Decimal(m) - Decimal(1)) * math.factorial(Decimal(n) - Decimal(m))) \
-    * Decimal(t)**Decimal(m - 1) * Decimal(T - t)**Decimal(n - m) * Decimal(math.e)**(Decimal(-1) * Decimal(lambda_poisson) * Decimal(T)))
+    return lambda_poisson**n / (math.factorial(m - 1) * math.factorial(n - m)) \
+    * t**(m - 1) * (T - t)**(n - m) * math.e**(-lambda_poisson * T)
 
 # 多数決による判定精度
 # n人で多数決を行う場合の判定精度をacc(n)で表す
@@ -79,7 +79,7 @@ def vote_priority_method(k, w, p, lambda_poisson):
         value = integrate.quad(lambda t: w * t * gamma_probability(j, t, lambda_poisson), 0, 1000)[0]
         utility += (scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value)) + (scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * -value )
     return utility
-    
+
 # 増減を調べる
 def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
     for k in xrange(1, 1000):
