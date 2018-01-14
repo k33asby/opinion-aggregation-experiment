@@ -67,7 +67,7 @@ def vote_priority_method(k, w, p, lambda_poisson):
 def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
     for k in range(1, 1000):
         diff = vote_priority_method(k + 1, w, p, lambda_poisson) - vote_priority_method(k, w, p, lambda_poisson)
-    if diff < 0: return k
+        if diff < 0: return k
 
 def method1(t, w, p, lambda_poisson):
     return time_priority_method(t, w, p, lambda_poisson)
@@ -81,7 +81,7 @@ def method2(T1, n, w, p, lambda_poisson):
 
 def inc_and_dec_method2(T1, w, p, lambda_poisson):
     for n in range(1, 50):
-        diff = method2(T1, 2 * n + 1, w, p, lambda_poisson) - method2(T1, 2 * n - 1, w, p, lambda_poisson)
+        diff = poisson_probability(2 * n, T1, lambda_poisson) * (acc(2 * n, p) - w * T1) + poisson_probability(2 * n - 1, T1, lambda_poisson) * (acc(2 * n - 1, p) - w * T1) + integrate.quad(lambda t: (acc(2 * n + 1, p) - w * t) * gamma_probability(2 * n + 1, t, lambda_poisson), 0, T1)[0] - integrate.quad(lambda t: (acc(2 * n - 1 , p) - w * t) * gamma_probability(2 * n - 1, t, lambda_poisson), 0, T1)[0]
         if diff < 0:
             return 2 * n - 1
 

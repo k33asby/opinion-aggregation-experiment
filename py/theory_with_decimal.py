@@ -83,7 +83,7 @@ def vote_priority_method(k, w, p, lambda_poisson):
 def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
     for k in range(1, 1000):
         diff = vote_priority_method(k + 1, w, p, lambda_poisson) - vote_priority_method(k, w, p, lambda_poisson)
-    if diff < 0: return k
+        if diff < 0: return k
 
 def method1(t, w, p, lambda_poisson):
     return time_priority_method(t, w, p, lambda_poisson)
