@@ -1,6 +1,10 @@
 def poisson_probability(n, t, lambda_poisson):
     return math.e**(-lambda_poisson * t) * (lambda_poisson * t)**n / math.factorial(n)
 
+# P(n, t+1) - P(n, t)
+def diff_poisson(n, t, lambda_poisson):
+    return math.e**(-lambda_poisson * t) * (lambda_poisson * t)**n * (math.e**-lambda_poisson * lambda_poisson**n - 1) / math.factorial(n)
+
 def gamma_probability(n, t, lambda_poisson):
     return lambda_poisson**n * t**(n - 1) * math.e**(-lambda_poisson * t) / math.factorial(n - 1)
 
@@ -36,6 +40,12 @@ def inc_and_dec_time_priority_method(w, p, lambda_poisson):
     for t in range(1, 1000):
         diff = time_priority_method(t + 1, w, p, lambda_poisson) - time_priority_method(t, w, p, lambda_poisson)
         if diff < 0: return t
+
+# 正しい動作しない
+# def diff_time_priority_method(w, p, lambda_poisson):
+#     for t in range(1, 1000):
+#         diff = np.sum(diff_poisson(i, t, lambda_poisson) * acc(i, p) for i in range(1,200)) - w
+#         if diff < 0: return t
 
 def poll_priority_method(n, w, p, lambda_poisson):
     if n == 0: return 0
