@@ -80,7 +80,7 @@ def method2(T1, n, w, p, lambda_poisson):
     return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in range(0, n)) + integrate.quad(lambda t: (acc(n, p) - w * t) * gamma_probability(n, t, lambda_poisson), 0, T1)[0]
 
 def inc_and_dec_method2(T1, w, p, lambda_poisson):
-    for n in range(1, 50):
+    for n in range(1, 1000):
         diff = poisson_probability(2 * n, T1, lambda_poisson) * (acc(2 * n, p) - w * T1) + poisson_probability(2 * n - 1, T1, lambda_poisson) * (acc(2 * n - 1, p) - w * T1) + integrate.quad(lambda t: (acc(2 * n + 1, p) - w * t) * gamma_probability(2 * n + 1, t, lambda_poisson), 0, T1)[0] - integrate.quad(lambda t: (acc(2 * n - 1 , p) - w * t) * gamma_probability(2 * n - 1, t, lambda_poisson), 0, T1)[0]
         if diff < 0:
             return 2 * n - 1
@@ -92,8 +92,12 @@ def method3(T1, T2, n, w, p, lambda_poisson):
     integrate.quad(lambda t: (acc(n, p) - w * T1) * g(n, i, t, T1, lambda_poisson), T2, T1)[0] for i in range(n, 120))
 
 def inc_and_dec_method3(T1, T2, w, p, lambda_poisson):
-    for n in range(1, 50):
-        diff = method3(T1, T2, 2 * n + 1, w, p, lambda_poisson) - method3(T1, T2, 2 * n - 1, w, p, lambda_poisson)
+    for n in range (1, 1000):
+        diff = poisson_probability(2 * n, T1, lambda_poisson) * (acc(2 * n, p) - w * T1) + poisson_probability(2 * n - 1, T1, lambda_poisson) * (acc(2 * n - 1, p) - w * T1) \
+        + np.sum(integrate.quad(lambda t: (acc(2 * n + 1, p) - w * t) * g(2 * n + 1, i, t, T1, lambda_poisson), 0, T2)[0] + \
+        integrate.quad(lambda t: (acc(2 * n + 1, p) - w * T1) * g(2 * n + 1, i, t, T1, lambda_poisson), T2, T1)[0] for i in range(2 * n + 1, 60)) \
+        - np.sum(integrate.quad(lambda t: (acc(2* n - 1, p) - w * t) * g(2 * n - 1, i, t, T1, lambda_poisson), 0, T2)[0] + \
+        integrate.quad(lambda t: (acc(2 * n - 1, p) - w * T1) * g(2 * n - 1, i, t, T1, lambda_poisson), T2, T1)[0] for i in range(2 * n - 1, 60))
         if diff < 0:
             return 2 * n - 1
 
