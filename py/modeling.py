@@ -437,21 +437,20 @@ class modeling:
         utility = 0
         for j in range(k, 2 * k):
             # 積分を行う
-            value_1, abserr = integrate.quad(lambda t: (1 -w * t) * self.gamma_probability(j, t, lambda_poisson), 0, T1)
-            value_2, abserr = integrate.quad(lambda t: (0 - w * t) * self.gamma_probability(j, t, lambda_poisson), 0, T1)
+            value_1 = integrate.quad(lambda t: w * t * gamma_probability(j, t, lambda_poisson), 0, T1)[0]
             # ----被積分関数を定義----
             def integrand_for_method4(t):
                 integrand = 0
                 for l in range(0, j):
                     p_sum = 0
                     for m in range(0, j):
-                        p_sum += self.poisson_probability(m, T1, lambda_poisson)
-                    integrand += ((self.poisson_probability(l, T1, lambda_poisson) * self.acc(l, p) / p_sum) - w * T1) * self.gamma_probability(j, t, lambda_poisson)
-                return integrand
+                        p_sum += poisson_probability(m, T1, lambda_poisson)
+                    integrand += ((poisson_probability(l, T1, lambda_poisson) * acc(l, p) / p_sum) - w * T1)
+                return integrand * gamma_probability(j, t, lambda_poisson)
             # --------終わり--------
-            value_3, abserr = integrate.quad(integrand_for_method4, T1, 1000)
-            utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (value_1 + value_3)
-            utility += scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * (value_2 + value_3)
+            value_2, abserr = integrate.quad(integrand_for_method4, T1, 1000)
+            utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value_1 + value_2)
+            utility += scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * (-value_1 + value_2)
         return utility
 
     # 増減を調べる

@@ -101,6 +101,27 @@ def inc_and_dec_method3(T1, T2, w, p, lambda_poisson):
         if diff < 0:
             return 2 * n - 1
 
+def method4(T1, k, w, p, lambda_poisson):
+    if k == 0: return 0
+    utility = 0
+    for j in range(k, 2 * k):
+        # 積分を行う
+        value_1 = integrate.quad(lambda t: w * t * gamma_probability(j, t, lambda_poisson), 0, T1)[0]
+        # ----被積分関数を定義----
+        def integrand_for_method4(t):
+            integrand = 0
+            for l in range(0, j):
+                p_sum = 0
+                for m in range(0, j):
+                    p_sum += poisson_probability(m, T1, lambda_poisson)
+                integrand += ((poisson_probability(l, T1, lambda_poisson) * acc(l, p) / p_sum) - w * T1)
+            return integrand * gamma_probability(j, t, lambda_poisson)
+        # --------終わり--------
+        value_2, abserr = integrate.quad(integrand_for_method4, T1, 1000)
+        utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value_1 + value_2)
+        utility += scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * (-value_1 + value_2)
+    return utility
+
 # ------------グラフをプロットするメソッド------------
 def plot_poisson(time, lambda_poisson):
     x_axis = np.linspace(0, 2 * time * lambda_poisson, 2 * time * lambda_poisson + 1)
@@ -179,6 +200,15 @@ def plot_method3(T1, T2, w, p, lambda_poisson, s_time, t_time):
     y_axis = [method3(T1, T2, int(x), w, p, lambda_poisson) for x in x_axis]
     plt.title('method3 T1: {0} T2: {1} weight: {2} person_probability: {3}'.format(T1, T2, w, p))
     plt.xlabel('poll people')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_method4(self, T1, w, p, lambda_poisson):
+    x_axis = np.linspace(0, 50, 51)
+    y_axis = [self.model.method4(T1,int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('method4 T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
+    plt.xlabel('require vote people')
     plt.ylabel('utility')
     plt.plot(x_axis, y_axis)
     plt.show()
