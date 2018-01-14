@@ -5,7 +5,7 @@ def gamma_probability(n, t, lambda_poisson):
     return lambda_poisson**n * t**(n - 1) * math.e**(-lambda_poisson * t) / math.factorial(n - 1)
 
 def g(m, n, t, T, lambda_poisson):
-    return lambda_poisson**n / (math.factorial(m - 1) * math.factorial(n - m)) * t**(m - 1) * (T - t)**(n - m) * math.e**(-lambda_poisson * T)
+    return lambda_poisson**n * t**(m - 1) * (T - t)**(n - m) * math.e**(-lambda_poisson * T) / (math.factorial(m - 1) * math.factorial(n - m))
 
 def acc_odd(n, p):
     i = int((n + 1) / 2)
@@ -30,10 +30,10 @@ def acc(n, p):
 
 def time_priority_method(t, w, p, lambda_poisson):
     if t == 0: return 0
-    return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in xrange(1,200)) - (w * t)
+    return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in range(1,200)) - (w * t)
 
 def inc_and_dec_time_priority_method(w, p, lambda_poisson):
-    for t in xrange(1, 1000):
+    for t in range(1, 1000):
         diff = time_priority_method(t + 1, w, p, lambda_poisson) - time_priority_method(t, w, p, lambda_poisson)
         if diff < 0: return t
 
@@ -42,20 +42,20 @@ def poll_priority_method(n, w, p, lambda_poisson):
     return acc(n, p) - integrate.quad(lambda t: w * t * gamma_probability(n, t, lambda_poisson), 0, 1000)[0]
 
 def inc_and_dec_poll_priority_method(w, p, lambda_poisson):
-    for n in xrange(1, 1000):
+    for n in range(1, 1000):
         diff = poll_priority_method(2 * n + 1, w, p, lambda_poisson) - poll_priority_method(2 * n - 1, w, p, lambda_poisson)
         if diff < 0: return 2 * n - 1
 
 def vote_priority_method(k, w, p, lambda_poisson):
     if k == 0: return 0
     utility = 0
-    for j in xrange(k, 2 * k):
+    for j in range(k, 2 * k):
         value = integrate.quad(lambda t: w * t * gamma_probability(j, t, lambda_poisson), 0, 1000)[0]
         utility += (scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value)) + (scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * -value )
     return utility
 
 def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
-    for k in xrange(1, 1000):
+    for k in range(1, 1000):
         diff = vote_priority_method(k + 1, w, p, lambda_poisson) - vote_priority_method(k, w, p, lambda_poisson)
     if diff < 0: return k
 
@@ -67,7 +67,7 @@ def inc_and_dec_method1(w, p, lambda_poisson):
 
 def method2(T1, n, w, p, lambda_poisson):
     if n == 0: return 0
-    return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in xrange(0, n)) + integrate.quad(lambda t: (acc(n, p) - w * t) * gamma_probability(n, t, lambda_poisson), 0, T1)[0]
+    return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in range(0, n)) + integrate.quad(lambda t: (acc(n, p) - w * t) * gamma_probability(n, t, lambda_poisson), 0, T1)[0]
 
 def inc_and_dec_method2(T1, w, p, lambda_poisson):
     for n in range(1, 50):
@@ -77,9 +77,9 @@ def inc_and_dec_method2(T1, w, p, lambda_poisson):
 
 def method3(T1, T2, n, w, p, lambda_poisson):
     if n == 0: return 0
-    return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in xrange(0, n)) + \
+    return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in range(0, n)) + \
     np.sum(integrate.quad(lambda t: (acc(n, p) - w * t) * g(n, i, t, T1, lambda_poisson), 0, T2)[0] + \
-    integrate.quad(lambda t: (acc(n, p) - w * T1) * g(n, i, t, T1, lambda_poisson), T2, T1)[0] for i in xrange(n, 120))
+    integrate.quad(lambda t: (acc(n, p) - w * T1) * g(n, i, t, T1, lambda_poisson), T2, T1)[0] for i in range(n, 120))
 
 def inc_and_dec_method3(T1, T2, w, p, lambda_poisson):
     for n in range(1, 50):
