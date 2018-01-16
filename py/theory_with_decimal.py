@@ -30,12 +30,12 @@ def acc(n, p):
 
 def time_priority_method(t, w, p, lambda_poisson):
     if t == 0: return 0
-    return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in range(1,100)) - (w * t)
+    return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in range(1,120)) - (w * t)
 
 def max_time_priority(w, p, lambda_poisson):
     utility_list = []
     value_down = time_priority_method(1, w, p, lambda_poisson)
-    for r in range(2, 1000):
+    for t in range(2, 1000):
             value_up = time_priority_method(t, w, p, lambda_poisson)
             if (value_up - value_down) <= 0:
                 utility_list.append(value_down)
@@ -45,12 +45,14 @@ def max_time_priority(w, p, lambda_poisson):
 
 def inc_and_dec_time_priority_method(w, p, lambda_poisson):
     for t in range(1, 1000):
-        diff = time_priority_method(t + 1, w, p, lambda_poisson) - time_priority_method(t, w, p, lambda_poisson)
+        diff = -w
+        for i in range(1, 120):
+            diff += (poisson_probability(i, t + 1, lambda_poisson) - poisson_probability(i, t, lambda_poisson)) * acc(i, p)
         if diff < 0: return t
 
 def poll_priority_method(n, w, p, lambda_poisson):
     if n == 0: return 0
-    return acc(n, p) - integrate.quad(lambda t: w * t * gamma_probability(n, t, lambda_poisson), 0, np.inf)[0]
+    return acc(n, p) - w * 0.5 * n
 
 def max_poll_priority(w, p, lambda_poisson):
     utility_list = []
@@ -73,7 +75,7 @@ def vote_priority_method(k, w, p, lambda_poisson):
     if k == 0: return 0
     utility = 0
     for j in range(k, 2 * k):
-        value = integrate.quad(lambda t: w * t * gamma_probability(j, t, lambda_poisson), 0, np.inf)[0]
+        value = w * 0.5 * j
         utility += (scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value)) + (scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * -value )
     return utility
 
