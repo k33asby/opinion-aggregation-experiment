@@ -54,7 +54,7 @@ def inc_and_dec_time_priority_method(w, p, lambda_poisson):
 
 def poll_priority_method(n, w, p, lambda_poisson):
     if n == 0: return 0
-    return acc(n, p) - integrate.quad(lambda t: w * t * gamma_probability(n, t, lambda_poisson), 0, 1000)[0]
+    return acc(n, p) - integrate.quad(lambda t: w * t * gamma_probability(n, t, lambda_poisson), 0, np.inf)[0]
 
 def max_poll_priority(w, p, lambda_poisson):
     utility_list = []
@@ -68,15 +68,16 @@ def max_poll_priority(w, p, lambda_poisson):
     return max(utility_list)
 
 def inc_and_dec_poll_priority_method(w, p, lambda_poisson):
+    negative = integrate.quad(lambda t: w * t * gamma_probability(2, t, lambda_poisson), 0, np.inf)[0]
     for n in range(1, 1000):
-        diff = poll_priority_method(2 * n + 1, w, p, lambda_poisson) - poll_priority_method(2 * n - 1, w, p, lambda_poisson)
+        diff = acc(2 * n + 1, p) - acc(2 * n - 1, p) - negative
         if diff < 0: return 2 * n - 1
 
 def vote_priority_method(k, w, p, lambda_poisson):
     if k == 0: return 0
     utility = 0
     for j in range(k, 2 * k):
-        value = integrate.quad(lambda t: w * t * gamma_probability(j, t, lambda_poisson), 0, 500)[0]
+        value = integrate.quad(lambda t: w * t * gamma_probability(j, t, lambda_poisson), 0, np.inf)[0]
         utility += (scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value)) + (scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * -value )
     return utility
 
@@ -174,7 +175,7 @@ def method4(T1, k, w, p, lambda_poisson):
                 integrand += ((poisson_probability(l, T1, lambda_poisson) * acc(l, p) / p_sum)  - w * T1)
             return integrand * gamma_probability(j, t, lambda_poisson)
         # --------終わり--------
-        value_2, abserr = integrate.quad(integrand_for_method4, T1, 1000)
+        value_2, abserr = integrate.quad(integrand_for_method4, T1, np.inf)
         utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value_1 + value_2)
         utility += scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * (-value_1 + value_2)
     return utility
