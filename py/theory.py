@@ -33,15 +33,19 @@ def time_priority_method(t, w, p, lambda_poisson):
     return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in range(1,120)) - (w * t)
 
 def max_time_priority(w, p, lambda_poisson):
-    utility_list = []
+    value_down = time_priority_method(1, w, p, lambda_poisson)
+    for t in range(2, 1000):
+            value_up = time_priority_method(t, w, p, lambda_poisson)
+            if (value_up - value_down) <= 0: return value_down
+            value_down = value_up
+
+def max_time_priority_with_error(w, p, p_error, lambda_poisson, lambda_poison_error):
     value_down = time_priority_method(1, w, p, lambda_poisson)
     for t in range(2, 1000):
             value_up = time_priority_method(t, w, p, lambda_poisson)
             if (value_up - value_down) <= 0:
-                utility_list.append(value_down)
-                break
+                return time_priority_method(t - 1, w, p + p_error, lambda_poisson + lambda_poison_error)
             value_down = value_up
-    return max(utility_list)
 
 def inc_and_dec_time_priority_method(w, p, lambda_poisson):
     for t in range(1, 1000):
@@ -55,20 +59,23 @@ def poll_priority_method(n, w, p, lambda_poisson):
     return acc(n, p) - w * 0.5 * n
 
 def max_poll_priority(w, p, lambda_poisson):
-    utility_list = []
+    value_down = poll_priority_method(1, w, p, lambda_poisson)
+    for n in range(1, 1000):
+            value_up = poll_priority_method(2 *n + 1, w, p, lambda_poisson)
+            if (value_up - value_down) <= 0: return value_down
+            value_down = value_up
+
+def max_poll_priority_with_error(w, p, p_error, lambda_poisson, lambda_poison_error):
     value_down = poll_priority_method(1, w, p, lambda_poisson)
     for n in range(1, 1000):
             value_up = poll_priority_method(2 *n + 1, w, p, lambda_poisson)
             if (value_up - value_down) <= 0:
-                utility_list.append(value_down)
-                break
+                return poll_priority_method(2 * n - 1, w, p + p_error, lambda_poisson + lambda_poison_error)
             value_down = value_up
-    return max(utility_list)
 
 def inc_and_dec_poll_priority_method(w, p, lambda_poisson):
-    negative = integrate.quad(lambda t: w * t * gamma_probability(2, t, lambda_poisson), 0, np.inf)[0]
     for n in range(1, 1000):
-        diff = acc(2 * n + 1, p) - acc(2 * n - 1, p) - negative
+        diff = acc(2 * n + 1, p) - acc(2 * n - 1, p) - w
         if diff < 0: return 2 * n - 1
 
 def vote_priority_method(k, w, p, lambda_poisson):
@@ -80,15 +87,19 @@ def vote_priority_method(k, w, p, lambda_poisson):
     return utility
 
 def max_vote_priority(w, p, lambda_poisson):
-    utility_list = []
+    value_down = vote_priority_method(1, w, p, lambda_poisson)
+    for k in range(2, 1000):
+            value_up = vote_priority_method(k, w, p, lambda_poisson)
+            if (value_up - value_down) <= 0: return  value_down
+            value_down = value_up
+
+def max_vote_priority_with_error(w, p, p_error, lambda_poisson, lambda_poison_error):
     value_down = vote_priority_method(1, w, p, lambda_poisson)
     for k in range(2, 1000):
             value_up = vote_priority_method(k, w, p, lambda_poisson)
             if (value_up - value_down) <= 0:
-                utility_list.append(value_down)
-                break
+                return vote_priority_method(k - 1, w, p + p_error, lambda_poisson + lambda_poison_error)
             value_down = value_up
-    return max(utility_list)
 
 def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
     for k in range(1, 1000):
@@ -106,17 +117,33 @@ def method2(T1, n, w, p, lambda_poisson):
     return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in range(0, n)) + integrate.quad(lambda t: (acc(n, p) - w * t) * gamma_probability(n, t, lambda_poisson), 0, T1)[0]
 
 def max_method2(T1_start, T1_end, w, p, lambda_poisson):
-    utility_list = []
+    max_utility = 0
     T1_range = range(T1_start, T1_end)
     for t1 in T1_range:
         value_down = method2(t1, 1, w, p, lambda_poisson)
         for n in range(1, 1000):
                 value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
-                    utility_list.append(value_down)
+                    if value_down > max_utility: max_utility = value_down
                     break
                 value_down = value_up
-    return  max(utility_list)
+    return  max_utility
+
+def max_method2_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lambda_poison_error):
+    max_utility = 0
+    param_arr = np.array((0, 0)) # [0] => T1, [1] => n
+    T1_range = range(T1_start, T1_end)
+    for t1 in T1_range:
+        value_down = method2(t1, 1, w, p, lambda_poisson)
+        for n in range(1, 1000):
+                value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
+                if (value_up - value_down) <= 0:
+                    if value_down > max_utility:
+                        max_utility = value_down
+                        param_arr = np.array((t1, 2 * n - 1))
+                    break
+                value_down = value_up
+    return  method2(param_arr[0], param_arr[1], w, p + p_error, lambda_poisson + lambda_poison_error)
 
 def inc_and_dec_method2(T1, w, p, lambda_poisson):
     for n in range(1, 1000):
@@ -131,7 +158,7 @@ def method3(T1, T2, n, w, p, lambda_poisson):
     integrate.quad(lambda t: (acc(n, p) - w * T1) * g(n, i, t, T1, lambda_poisson), T2, T1)[0] for i in range(n, 120))
 
 def max_method3(T1_start, T1_end, w, p, lambda_poisson):
-    utility_list = []
+    max_utility = 0
     T1_range = range(T1_start, T1_end)
     for t1 in T1_range:
         for t2 in range(1, t1 + 1):
@@ -140,11 +167,27 @@ def max_method3(T1_start, T1_end, w, p, lambda_poisson):
             for n in range(1, 1000):
                 value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
-                    temp_utility_list.append(value_down)
+                    if value_down > max_utility: max_utility = value_down
                     break
                 value_down = value_up
-        utility_list.append(max(temp_utility_list))
-    return max(utility_list)
+    return max_utility
+
+def max_method3_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lambda_poison_error):
+    max_utility = 0
+    param_arr = np.array((0, 0, 0)) # [0] => T1, [1] => T2, [2] => n
+    T1_range = range(T1_start, T1_end)
+    for t1 in T1_range:
+        for t2 in range(1, t1 + 1):
+            value_down = method3(t1, t2, 1, w, p, lambda_poisson)
+            for n in range(1, 1000):
+                value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
+                if (value_up - value_down) <= 0:
+                    if value_down > max_utility:
+                        max_utility = value_down
+                        param_arr = np.array((t1, t2, 2 * n - 1))
+                    break
+                value_down = value_up
+    return method3(param_arr[0], param_arr[1], param_arr[2], w, p + p_error, lambda_poisson + lambda_poison_error)
 
 def inc_and_dec_method3(T1, T2, w, p, lambda_poisson):
     for n in range (1, 1000):
