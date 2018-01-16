@@ -32,6 +32,17 @@ def time_priority_method(t, w, p, lambda_poisson):
     if t == 0: return 0
     return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in range(1,200)) - (w * t)
 
+def max_time_priority(w, p, lambda_poisson):
+    utility_list = []
+    value_down = time_priority_method(1, w, p, lambda_poisson)
+    for r in range(2, 1000):
+            value_up = time_priority_method(t, w, p, lambda_poisson)
+            if (value_up - value_down) <= 0:
+                utility_list.append(value_down)
+                break
+            value_down = value_up
+    return max(utility_list)
+
 def inc_and_dec_time_priority_method(w, p, lambda_poisson):
     for t in range(1, 1000):
         diff = time_priority_method(t + 1, w, p, lambda_poisson) - time_priority_method(t, w, p, lambda_poisson)
@@ -40,6 +51,17 @@ def inc_and_dec_time_priority_method(w, p, lambda_poisson):
 def poll_priority_method(n, w, p, lambda_poisson):
     if n == 0: return 0
     return acc(n, p) - integrate.quad(lambda t: w * t * gamma_probability(n, t, lambda_poisson), 0, 1000)[0]
+
+def max_poll_priority(w, p, lambda_poisson):
+    utility_list = []
+    value_down = poll_priority_method(1, w, p, lambda_poisson)
+    for n in range(1, 1000):
+            value_up = poll_priority_method(2 *n + 1, w, p, lambda_poisson)
+            if (value_up - value_down) <= 0:
+                utility_list.append(value_down)
+                break
+            value_down = value_up
+    return max(utility_list)
 
 def inc_and_dec_poll_priority_method(w, p, lambda_poisson):
     for n in range(1, 1000):
@@ -53,6 +75,17 @@ def vote_priority_method(k, w, p, lambda_poisson):
         value = integrate.quad(lambda t: w * t * gamma_probability(j, t, lambda_poisson), 0, 1000)[0]
         utility += (scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value)) + (scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * -value )
     return utility
+
+def max_vote_priority(w, p, lambda_poisson):
+    utility_list = []
+    value_down = vote_priority_method(1, w, p, lambda_poisson)
+    for k in range(2, 1000):
+            value_up = vote_priority_method(k, w, p, lambda_poisson)
+            if (value_up - value_down) <= 0:
+                utility_list.append(value_down)
+                break
+            value_down = value_up
+    return max(utility_list)
 
 def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
     for k in range(1, 1000):
@@ -69,6 +102,19 @@ def method2(T1, n, w, p, lambda_poisson):
     if n == 0: return 0
     return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in range(0, n)) + integrate.quad(lambda t: (acc(n, p) - w * t) * gamma_probability(n, t, lambda_poisson), 0, T1)[0]
 
+def max_method2(T1_start, T1_end, w, p, lambda_poisson):
+    utility_list = []
+    T1_range = range(T1_start, T1_end)
+    for t1 in T1_range:
+        value_down = method2(t1, 1, w, p, lambda_poisson)
+        for n in range(1, 1000):
+                value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
+                if (value_up - value_down) <= 0:
+                    utility_list.append(value_down)
+                    break
+                value_down = value_up
+    return  max(utility_list)
+
 def inc_and_dec_method2(T1, w, p, lambda_poisson):
     for n in range(1, 50):
         diff = method2(T1, 2 * n + 1, w, p, lambda_poisson) - method2(T1, 2 * n - 1, w, p, lambda_poisson)
@@ -80,6 +126,23 @@ def method3(T1, T2, n, w, p, lambda_poisson):
     return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in range(0, n)) + \
     np.sum(integrate.quad(lambda t: (acc(n, p) - w * t) * g(n, i, t, T1, lambda_poisson), 0, T2)[0] + \
     integrate.quad(lambda t: (acc(n, p) - w * T1) * g(n, i, t, T1, lambda_poisson), T2, T1)[0] for i in range(n, 120))
+
+def max_method3(T1_start, T1_end, w, p, lambda_poisson):
+    utility_list = []
+    T1_range = range(T1_start, T1_end)
+    for t1 in T1_range:
+        for t2 in range(1, t1 + 1):
+            temp_utility_list = []
+            value_down = method3(t1, t2, 1, w, p, lambda_poisson)
+            for n in range(1, 1000):
+                value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
+                if (value_up - value_down) <= 0:
+                    temp_utility_list.append(value_down)
+                    break
+                value_down = value_up
+        utility_list.append(max(temp_utility_list))
+    return max(utility_list)
+
 
 def inc_and_dec_method3(T1, T2, w, p, lambda_poisson):
     for n in range (1, 1000):
