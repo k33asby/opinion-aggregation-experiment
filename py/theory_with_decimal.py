@@ -183,13 +183,6 @@ def inc_and_dec_method2(T1, w, p, lambda_poisson):
         if diff < 0:
             return 2 * n - 1
 
-# @lru_cache(maxsize=None)
-# def method3(T1, T2, n, w, p, lambda_poisson):
-#     if n == 0: return 0
-#     return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in range(0, n)) + \
-#     np.sum(integrate.quad(lambda t: (acc(n, p) - w * t) * g(n, i, t, T1, lambda_poisson), 0, T2)[0] + \
-#     integrate.quad(lambda t: (acc(n, p) - w * T1) * g(n, i, t, T1, lambda_poisson), T2, T1)[0] for i in range(n, 120))
-
 @lru_cache(maxsize=None)
 def integrate_for_method3_1(T1, T2, n, w, p, lambda_poisson, i):
     return integrate.quad(lambda t: (acc(n, p) - w * t) * g(n, i, t, T1, lambda_poisson), 0, T2)[0]
@@ -209,7 +202,6 @@ def max_method3(T1_start, T1_end, w, p, lambda_poisson):
     T1_range = range(T1_start, T1_end)
     for t1 in T1_range:
         for t2 in range(1, t1 + 1):
-            temp_utility_list = []
             value_down = method3(t1, t2, 1, w, p, lambda_poisson)
             for n in range(1, 1000):
                 value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
@@ -270,3 +262,115 @@ def method4(T1, k, w, p, lambda_poisson):
         utility += scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value_1 + value_2)
         utility += scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * (-value_1 + value_2)
     return utility
+
+# ------------グラフをプロットするメソッド------------
+def plot_poisson(time, lambda_poisson):
+    x_axis = np.linspace(0, 2 * time * lambda_poisson, 2 * time * lambda_poisson + 1)
+    y_axis = [poisson_probability(x, time, lambda_poisson) for x in x_axis]
+    plt.title('poisson time: {0} lambda: {1}'.format(time, lambda_poisson))
+    plt.xlabel('people')
+    plt.ylabel('probability')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_gamma(people, lambda_poisson):
+    x_axis = np.linspace(0, 2 * people / lambda_poisson , 2 * people / lambda_poisson + 1)
+    y_axis = [gamma_probability(people, x, lambda_poisson) for x in x_axis]
+    plt.title('gamma people: {0} lambda: {1}'.format(people, lambda_poisson))
+    plt.xlabel('time')
+    plt.ylabel('probability')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_g(m, n, T, lambda_poisson):
+    x_axis = np.linspace(0, T, T + 1)
+    y_axis = [g(m, n, x, T, lambda_poisson) for x in x_axis]
+    plt.title("g m: {0} n: {1} T:{2} lambda: {3}".format(m, n, T, lambda_poisson))
+    plt.xlabel('time')
+    plt.ylabel('probability')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_time_priority(w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
+    y_axis = [time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('time priority method weight: {0} person_probability: {1}'.format(w, p))
+    plt.xlabel('time')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_poll_priority(w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
+    y_axis = [poll_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('poll priority method weight: {0} person_probability: {1}'.format(w, p))
+    plt.xlabel('poll people')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_vote_priority(w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
+    y_axis = [vote_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('vote priority method weight: {0} person_probability: {1}'.format(w, p))
+    plt.xlabel('require vote people')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_method1(w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
+    y_axis = [time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('method1 weight: {0} person_probability: {1}'.format(w, p))
+    plt.xlabel('time')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_method2(T1, w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
+    y_axis = [method2(T1,int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('method2 T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
+    plt.xlabel('poll people')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_method3(T1, T2, w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
+    y_axis = [method3(T1, T2, int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('method3 T1: {0} T2: {1} weight: {2} person_probability: {3}'.format(T1, T2, w, p))
+    plt.xlabel('poll people')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_method4(T1, w, p, lambda_poisson, s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
+    y_axis = [method4(T1,int(x), w, p, lambda_poisson) for x in x_axis]
+    plt.title('method4 T1: {0} weight: {1} person_probability: {2}'.format(T1, w, p))
+    plt.xlabel('require vote people')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis)
+    plt.show()
+
+def plot_best_method(w, p_error, lambda_error):
+    color_list = []
+    lambda_range = np.linspace(1, 5, 8)
+    p_range = np.linspace(0.6, 0.9, 8)
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    ax.set_title('best method plot w: {0} p_error: {1} lambda_error: {2}'.format(w, p_error, lambda_error))
+    ax.set_xlabel('predicted p')
+    ax.set_ylabel('predicted lambda')
+    for p_i in range(len(p_range)):
+        for l_i in range(len(lambda_range)):
+            max_utility_dict = {
+                "red": max_time_priority_with_error(w, p_range[p_i], p_error, lambda_range[l_i], lambda_error),
+                "yellow": max_poll_priority_with_error(w, p_range[p_i], p_error, lambda_range[l_i], lambda_error),
+                "blue": max_vote_priority_with_error(w, p_range[p_i], p_error, lambda_range[l_i], lambda_error),
+                "gray": max_method2_with_error(1, 30, w, p_range[p_i], p_error, lambda_range[l_i], lambda_error),
+                "black": max_method3_with_error(24, 26, w, p_range[p_i], p_error, lambda_range[l_i], lambda_error)
+            }
+            ax.scatter(p_range[p_i], lambda_range[l_i], marker='s', s=150, c=max(max_utility_dict.items(), key=lambda x:x[1])[0], alpha=0.7)
+    fig.show()
