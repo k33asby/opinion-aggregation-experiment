@@ -264,6 +264,7 @@ def method4(T1, k, w, p, lambda_poisson):
     return utility
 
 # ------------グラフをプロットするメソッド------------
+@lru_cache(maxsize=None)
 def plot_poisson(time, lambda_poisson):
     x_axis = np.linspace(0, 2 * time * lambda_poisson, 2 * time * lambda_poisson + 1)
     y_axis = [poisson_probability(x, time, lambda_poisson) for x in x_axis]
@@ -273,6 +274,7 @@ def plot_poisson(time, lambda_poisson):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+@lru_cache(maxsize=None)
 def plot_gamma(people, lambda_poisson):
     x_axis = np.linspace(0, 2 * people / lambda_poisson , 2 * people / lambda_poisson + 1)
     y_axis = [gamma_probability(people, x, lambda_poisson) for x in x_axis]
@@ -282,6 +284,7 @@ def plot_gamma(people, lambda_poisson):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+@lru_cache(maxsize=None)
 def plot_g(m, n, T, lambda_poisson):
     x_axis = np.linspace(0, T, T + 1)
     y_axis = [g(m, n, x, T, lambda_poisson) for x in x_axis]
@@ -291,6 +294,7 @@ def plot_g(m, n, T, lambda_poisson):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+@lru_cache(maxsize=None)
 def plot_time_priority(w, p, lambda_poisson, s_time, t_time):
     x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = [time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
@@ -300,6 +304,7 @@ def plot_time_priority(w, p, lambda_poisson, s_time, t_time):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+@lru_cache(maxsize=None)
 def plot_poll_priority(w, p, lambda_poisson, s_time, t_time):
     x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = [poll_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
@@ -309,6 +314,7 @@ def plot_poll_priority(w, p, lambda_poisson, s_time, t_time):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+@lru_cache(maxsize=None)
 def plot_vote_priority(w, p, lambda_poisson, s_time, t_time):
     x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = [vote_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
@@ -318,6 +324,7 @@ def plot_vote_priority(w, p, lambda_poisson, s_time, t_time):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+@lru_cache(maxsize=None)
 def plot_method1(w, p, lambda_poisson, s_time, t_time):
     x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = [time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
@@ -327,6 +334,7 @@ def plot_method1(w, p, lambda_poisson, s_time, t_time):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+@lru_cache(maxsize=None)
 def plot_method2(T1, w, p, lambda_poisson, s_time, t_time):
     x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = [method2(T1,int(x), w, p, lambda_poisson) for x in x_axis]
@@ -336,6 +344,7 @@ def plot_method2(T1, w, p, lambda_poisson, s_time, t_time):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+@lru_cache(maxsize=None)
 def plot_method3(T1, T2, w, p, lambda_poisson, s_time, t_time):
     x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = [method3(T1, T2, int(x), w, p, lambda_poisson) for x in x_axis]
@@ -345,6 +354,7 @@ def plot_method3(T1, T2, w, p, lambda_poisson, s_time, t_time):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+@lru_cache(maxsize=None)
 def plot_method4(T1, w, p, lambda_poisson, s_time, t_time):
     x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
     y_axis = [method4(T1,int(x), w, p, lambda_poisson) for x in x_axis]
@@ -354,6 +364,47 @@ def plot_method4(T1, w, p, lambda_poisson, s_time, t_time):
     plt.plot(x_axis, y_axis)
     plt.show()
 
+# 横軸 実際のp, 縦軸 utility
+@lru_cache(maxsize=None)
+def plot_method_utility_with_p_error(w, predicted_p, predicted_lambda_poisson, lambda_poison_error):
+    x_axis = np.linspace(0.51, 0.99, 49)
+    time_priority_axis = [max_time_priority_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
+    poll_priority_axis = [max_poll_priority_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
+    vote_priority_axis = [max_vote_priority_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
+    method2_axis = [max_method2_with_error(1, 50, w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
+#     method3_axis = [max_method3_with_error(15, 30, w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
+    plt.title('method utility with p error w: {0} predicted_p: {1} predicted_lambda: {2} lambda_error: {3}'.format(w, predicted_p, predicted_lambda_poisson, lambda_poison_error))
+    plt.xlabel('actual p')
+    plt.ylabel('utility')
+    plt.plot(x_axis, time_priority_axis, label="time priority")
+    plt.plot(x_axis, poll_priority_axis, label="poll priority")
+    plt.plot(x_axis, vote_priority_axis, label="vote priority")
+    plt.plot(x_axis, method2_axis, label="method2")
+#     plt.plot(x_axis, method3_axis, label="method3")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+    plt.show()
+
+# 横軸 実際のlambda, 縦軸 utility
+@lru_cache(maxsize=None)
+def plot_method_utility_with_lambda_poisson_error(w, predicted_p, p_error, predicted_lambda_poisson):
+    x_axis = np.linspace(0, 5, 10)
+    time_priority_axis = [max_time_priority_with_error(w, predicted_p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
+    poll_priority_axis = [max_poll_priority_with_error(w, predicted_p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
+    vote_priority_axis = [max_vote_priority_with_error(w, predicted_p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
+    method2_axis = [max_method2_with_error(1, 50, w, predicted_p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
+#     method3_axis = [max_method3_with_error(15, 30, w, p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
+    plt.title('method utility with lambda error w: {0} predicted_p: {1} p_error: {2} predicted_lambda: {3}'.format(w, predicted_p, p_error, predicted_lambda_poisson))
+    plt.xlabel('actual lambda')
+    plt.ylabel('utility')
+    plt.plot(x_axis, time_priority_axis, label="time priority")
+    plt.plot(x_axis, poll_priority_axis, label="poll priority")
+    plt.plot(x_axis, vote_priority_axis, label="vote priority")
+    plt.plot(x_axis, method2_axis, label="method2")
+#     plt.plot(x_axis, method3_axis, label="method3")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+    plt.show()
+
+@lru_cache(maxsize=None)
 def plot_best_method(w, p_error, lambda_error):
     color_list = []
     lambda_range = np.linspace(1, 5, 8)
