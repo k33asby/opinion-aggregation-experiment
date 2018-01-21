@@ -147,6 +147,7 @@ def method2(T1, n, w, p, lambda_poisson):
 
 @lru_cache(maxsize=None)
 def max_method2(T1_start, T1_end, w, p, lambda_poisson):
+    flag = False
     max_utility = 0
     T1_range = range(T1_start, T1_end)
     for t1 in T1_range:
@@ -154,9 +155,13 @@ def max_method2(T1_start, T1_end, w, p, lambda_poisson):
         for n in range(1, 100000):
                 value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
-                    if value_down > max_utility: max_utility = value_down
-                    break
+                    if value_down > max_utility:
+                        max_utility = value_down
+                        break
+                    else:
+                        flag = True
                 value_down = value_up
+        if flag: break
     return max_utility
 
 @lru_cache(maxsize=None)
@@ -172,8 +177,11 @@ def max_method2_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lamb
                     if value_down > max_utility:
                         max_utility = value_down
                         param_arr = np.array((t1, 2 * n - 1))
+                    else:
+                        flag = True
                     break
                 value_down = value_up
+        if flag: break
     return  method2(param_arr[0], param_arr[1], w, p + p_error, lambda_poisson + lambda_poison_error)
 
 @lru_cache(maxsize=None)
