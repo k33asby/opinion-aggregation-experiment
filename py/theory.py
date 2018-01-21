@@ -209,6 +209,7 @@ def method3(T1, T2, n, w, p, lambda_poisson):
 
 @lru_cache(maxsize=None)
 def max_method3(T1_start, T1_end, w, p, lambda_poisson):
+    t2_flag = False
     max_utility = 0
     T1_range = range(T1_start, T1_end)
     for t1 in T1_range:
@@ -217,13 +218,18 @@ def max_method3(T1_start, T1_end, w, p, lambda_poisson):
             for n in range(1, 100000):
                 value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
-                    if value_down > max_utility: max_utility = value_down
+                    if value_down > max_utility:
+                        max_utility = value_down
+                    else:
+                        t2_flag = True
                     break
                 value_down = value_up
+            if t2_flag: break
     return max_utility
 
 @lru_cache(maxsize=None)
 def max_method3_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lambda_poison_error):
+    t2_flag = False
     max_utility = 0
     param_arr = np.array((0, 0, 0)) # [0] => T1, [1] => T2, [2] => n
     T1_range = range(T1_start, T1_end)
@@ -236,8 +242,11 @@ def max_method3_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lamb
                     if value_down > max_utility:
                         max_utility = value_down
                         param_arr = np.array((t1, t2, 2 * n - 1))
+                    else:
+                        flag = True
                     break
                 value_down = value_up
+            if t2_flag: break
     return method3(param_arr[0], param_arr[1], param_arr[2], w, p + p_error, lambda_poisson + lambda_poison_error)
 
 @lru_cache(maxsize=None)
