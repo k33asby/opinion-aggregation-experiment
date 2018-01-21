@@ -42,7 +42,7 @@ def time_priority_method(t, w, p, lambda_poisson):
 @lru_cache(maxsize=None)
 def max_time_priority(w, p, lambda_poisson):
     value_down = time_priority_method(1, w, p, lambda_poisson)
-    for t in range(2, 1000):
+    for t in range(2, 100000):
             value_up = time_priority_method(t, w, p, lambda_poisson)
             if (value_up - value_down) <= 0: return value_down
             value_down = value_up
@@ -50,7 +50,7 @@ def max_time_priority(w, p, lambda_poisson):
 @lru_cache(maxsize=None)
 def max_time_priority_with_error(w, p, p_error, lambda_poisson, lambda_poison_error):
     value_down = time_priority_method(1, w, p, lambda_poisson)
-    for t in range(2, 1000):
+    for t in range(2, 100000):
             value_up = time_priority_method(t, w, p, lambda_poisson)
             if (value_up - value_down) <= 0:
                 return time_priority_method(t - 1, w, p + p_error, lambda_poisson + lambda_poison_error)
@@ -58,7 +58,7 @@ def max_time_priority_with_error(w, p, p_error, lambda_poisson, lambda_poison_er
 
 @lru_cache(maxsize=None)
 def inc_and_dec_time_priority_method(w, p, lambda_poisson):
-    for t in range(1, 1000):
+    for t in range(1, 100000):
         diff = -w
         for i in range(1, 120):
             diff += (poisson_probability(i, t + 1, lambda_poisson) - poisson_probability(i, t, lambda_poisson)) * acc(i, p)
@@ -67,12 +67,12 @@ def inc_and_dec_time_priority_method(w, p, lambda_poisson):
 @lru_cache(maxsize=None)
 def poll_priority_method(n, w, p, lambda_poisson):
     if n == 0: return 0
-    return acc(n, p) - w * 0.5 * n
+    return acc(n, p) - w * n / lambda_poisson
 
 @lru_cache(maxsize=None)
 def max_poll_priority(w, p, lambda_poisson):
     value_down = poll_priority_method(1, w, p, lambda_poisson)
-    for n in range(1, 1000):
+    for n in range(1, 100000):
             value_up = poll_priority_method(2 *n + 1, w, p, lambda_poisson)
             if (value_up - value_down) <= 0: return value_down
             value_down = value_up
@@ -80,15 +80,15 @@ def max_poll_priority(w, p, lambda_poisson):
 @lru_cache(maxsize=None)
 def max_poll_priority_with_error(w, p, p_error, lambda_poisson, lambda_poison_error):
     value_down = poll_priority_method(1, w, p, lambda_poisson)
-    for n in range(1, 1000):
-            value_up = poll_priority_method(2 *n + 1, w, p, lambda_poisson)
+    for n in range(1, 100000):
+            value_up = poll_priority_method(2 * n + 1, w, p, lambda_poisson)
             if (value_up - value_down) <= 0:
                 return poll_priority_method(2 * n - 1, w, p + p_error, lambda_poisson + lambda_poison_error)
             value_down = value_up
 
 @lru_cache(maxsize=None)
 def inc_and_dec_poll_priority_method(w, p, lambda_poisson):
-    for n in range(1, 1000):
+    for n in range(1, 100000):
         diff = acc(2 * n + 1, p) - acc(2 * n - 1, p) - w
         if diff < 0: return 2 * n - 1
 
@@ -97,14 +97,14 @@ def vote_priority_method(k, w, p, lambda_poisson):
     if k == 0: return 0
     utility = 0
     for j in range(k, 2 * k):
-        value = w * 0.5 * j
+        value = w * j / lambda_poisson
         utility += (scm.comb(j - 1, j - k) * p**(k - 1) * (1 - p)**(j - k) * p * (1 - value)) + (scm.comb(j - 1, j - k) * p**(j - k) * (1 - p)**(k - 1) * (1 - p) * -value )
     return utility
 
 @lru_cache(maxsize=None)
 def max_vote_priority(w, p, lambda_poisson):
     value_down = vote_priority_method(1, w, p, lambda_poisson)
-    for k in range(2, 1000):
+    for k in range(2, 100000):
             value_up = vote_priority_method(k, w, p, lambda_poisson)
             if (value_up - value_down) <= 0: return  value_down
             value_down = value_up
@@ -112,7 +112,7 @@ def max_vote_priority(w, p, lambda_poisson):
 @lru_cache(maxsize=None)
 def max_vote_priority_with_error(w, p, p_error, lambda_poisson, lambda_poison_error):
     value_down = vote_priority_method(1, w, p, lambda_poisson)
-    for k in range(2, 1000):
+    for k in range(2, 100000):
             value_up = vote_priority_method(k, w, p, lambda_poisson)
             if (value_up - value_down) <= 0:
                 return vote_priority_method(k - 1, w, p + p_error, lambda_poisson + lambda_poison_error)
@@ -120,7 +120,7 @@ def max_vote_priority_with_error(w, p, p_error, lambda_poisson, lambda_poison_er
 
 @lru_cache(maxsize=None)
 def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
-    for k in range(1, 1000):
+    for k in range(1, 100000):
         diff = vote_priority_method(k + 1, w, p, lambda_poisson) - vote_priority_method(k, w, p, lambda_poisson)
         if diff < 0: return k
 
@@ -151,13 +151,13 @@ def max_method2(T1_start, T1_end, w, p, lambda_poisson):
     T1_range = range(T1_start, T1_end)
     for t1 in T1_range:
         value_down = method2(t1, 1, w, p, lambda_poisson)
-        for n in range(1, 1000):
+        for n in range(1, 100000):
                 value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
                     if value_down > max_utility: max_utility = value_down
                     break
                 value_down = value_up
-    return  max_utility
+    return max_utility
 
 @lru_cache(maxsize=None)
 def max_method2_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lambda_poison_error):
@@ -166,7 +166,7 @@ def max_method2_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lamb
     T1_range = range(T1_start, T1_end)
     for t1 in T1_range:
         value_down = method2(t1, 1, w, p, lambda_poisson)
-        for n in range(1, 1000):
+        for n in range(1, 100000):
                 value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
                     if value_down > max_utility:
@@ -178,7 +178,7 @@ def max_method2_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lamb
 
 @lru_cache(maxsize=None)
 def inc_and_dec_method2(T1, w, p, lambda_poisson):
-    for n in range(1, 1000):
+    for n in range(1, 100000):
         diff = poisson_probability(2 * n, T1, lambda_poisson) * (acc(2 * n, p) - w * T1) + poisson_probability(2 * n - 1, T1, lambda_poisson) * (acc(2 * n - 1, p) - w * T1) + integrate.quad(lambda t: (acc(2 * n + 1, p) - w * t) * gamma_probability(2 * n + 1, t, lambda_poisson), 0, T1)[0] - integrate.quad(lambda t: (acc(2 * n - 1 , p) - w * t) * gamma_probability(2 * n - 1, t, lambda_poisson), 0, T1)[0]
         if diff < 0:
             return 2 * n - 1
@@ -191,10 +191,12 @@ def integrate_for_method3_1(T1, T2, n, w, p, lambda_poisson, i):
 def integrate_for_method3_2(T1, T2, n, w, p, lambda_poisson, i):
     return integrate.quad(lambda t: (acc(n, p) - w * T1) * g(n, i, t, T1, lambda_poisson), T2, T1)[0]
 
+# T1までに平均 T1 * lambda人到着するので、無限人まで繰り返したいが不可能なので T1 * lambda * 1.8回繰り返す
 @lru_cache(maxsize=None)
 def method3(T1, T2, n, w, p, lambda_poisson):
     if n == 0: return 0
-    return not_stop_by_T1(T1, n, w, p, lambda_poisson) + np.sum(integrate_for_method3_1(T1, T2, n, w, p, lambda_poisson, i) + integrate_for_method3_2(T1, T2, n, w, p, lambda_poisson, i) for i in range(n, 100))
+    return not_stop_by_T1(T1, n, w, p, lambda_poisson) + np.sum(integrate_for_method3_1(T1, T2, n, w, p, lambda_poisson, i) + \
+            integrate_for_method3_2(T1, T2, n, w, p, lambda_poisson, i) for i in range(n,int(T1 * lambda_poisson * 1.8)))
 
 @lru_cache(maxsize=None)
 def max_method3(T1_start, T1_end, w, p, lambda_poisson):
@@ -203,7 +205,7 @@ def max_method3(T1_start, T1_end, w, p, lambda_poisson):
     for t1 in T1_range:
         for t2 in range(1, t1 + 1):
             value_down = method3(t1, t2, 1, w, p, lambda_poisson)
-            for n in range(1, 1000):
+            for n in range(1, 100000):
                 value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
                     if value_down > max_utility: max_utility = value_down
@@ -219,7 +221,7 @@ def max_method3_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lamb
     for t1 in T1_range:
         for t2 in range(1, t1 + 1):
             value_down = method3(t1, t2, 1, w, p, lambda_poisson)
-            for n in range(1, 1000):
+            for n in range(1, 100000):
                 value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
                     if value_down > max_utility:
