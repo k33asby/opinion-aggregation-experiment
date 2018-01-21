@@ -145,65 +145,44 @@ def method2(T1, n, w, p, lambda_poisson):
     if n == 0: return 0
     return not_stop_by_T1(T1, n, w, p, lambda_poisson) + stop_by_T1(T1, n, w, p, lambda_poisson)
 
+# 返り値は最大の効用とその時のT1のリスト
 @lru_cache(maxsize=None)
-def max_method2_t1(w, p, lambda_poisson):
+def max_method2(w, p, lambda_poisson):
     max_utility = 0
     T1_range = range(1, 10000)
     for t1 in T1_range:
         value_down = method2(t1, 1, w, p, lambda_poisson)
-        for n in range(1, 100000):
+        for n in range(1, 10000):
                 value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
                     if value_down > max_utility:
                         max_utility = value_down
                         break
                     else:
-                        return t1
+                        return [max_utility, t1]
                 value_down = value_up
 
 @lru_cache(maxsize=None)
-def max_method2(T1_start, T1_end, w, p, lambda_poisson):
-    flag = False
-    max_utility = 0
-    T1_range = range(T1_start, T1_end)
-    for t1 in T1_range:
-        value_down = method2(t1, 1, w, p, lambda_poisson)
-        for n in range(1, 100000):
-                value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
-                if (value_up - value_down) <= 0:
-                    if value_down > max_utility:
-                        max_utility = value_down
-                        break
-                    else:
-                        flag = True
-                value_down = value_up
-        if flag: break
-    return max_utility
-
-@lru_cache(maxsize=None)
-def max_method2_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lambda_poison_error):
-    flag = False
+def max_method2_with_error(w, p, p_error, lambda_poisson, lambda_poison_error):
     max_utility = 0
     param_arr = np.array((0, 0)) # [0] => T1, [1] => n
-    T1_range = range(T1_start, T1_end)
+    T1_range = range(1, 10000)
     for t1 in T1_range:
         value_down = method2(t1, 1, w, p, lambda_poisson)
-        for n in range(1, 100000):
+        for n in range(1, 10000):
                 value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
                 if (value_up - value_down) <= 0:
                     if value_down > max_utility:
                         max_utility = value_down
                         param_arr = np.array((t1, 2 * n - 1))
                     else:
-                        flag = True
+                        return [method2(param_arr[0], param_arr[1], w, p + p_error, lambda_poisson + lambda_poison_error), t1]
                     break
                 value_down = value_up
-        if flag: break
-    return  method2(param_arr[0], param_arr[1], w, p + p_error, lambda_poisson + lambda_poison_error)
 
 @lru_cache(maxsize=None)
 def inc_and_dec_method2(T1, w, p, lambda_poisson):
-    for n in range(1, 100000):
+    for n in range(1, 10000):
         diff = poisson_probability(2 * n, T1, lambda_poisson) * (acc(2 * n, p) - w * T1) + poisson_probability(2 * n - 1, T1, lambda_poisson) * (acc(2 * n - 1, p) - w * T1) + integrate.quad(lambda t: (acc(2 * n + 1, p) - w * t) * gamma_probability(2 * n + 1, t, lambda_poisson), 0, T1)[0] - integrate.quad(lambda t: (acc(2 * n - 1 , p) - w * t) * gamma_probability(2 * n - 1, t, lambda_poisson), 0, T1)[0]
         if diff < 0:
             return 2 * n - 1
@@ -223,47 +202,41 @@ def method3(T1, T2, n, w, p, lambda_poisson):
     return not_stop_by_T1(T1, n, w, p, lambda_poisson) + np.sum(integrate_for_method3_1(T1, T2, n, w, p, lambda_poisson, i) + \
             integrate_for_method3_2(T1, T2, n, w, p, lambda_poisson, i) for i in range(n,int(T1 * lambda_poisson * 1.8)))
 
+# utl_errorが0に近付けば近くほどutilityは正確になる(0.00001くらいでよい)
 @lru_cache(maxsize=None)
-def max_method3(T1_start, T1_end, w, p, lambda_poisson):
-    t2_flag = False
+def max_method3(w, p, lambda_poisson, utl_error):
     max_utility = 0
-    T1_range = range(T1_start, T1_end)
-    for t1 in T1_range:
-        for t2 in range(1, t1 + 1):
-            value_down = method3(t1, t2, 1, w, p, lambda_poisson)
-            for n in range(1, 100000):
-                value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
-                if (value_up - value_down) <= 0:
-                    if value_down > max_utility:
-                        max_utility = value_down
-                    else:
-                        t2_flag = True
+    t1 = max_method2(w, p, lambda_poisson)[1]
+    for t2 in range(1, t1 + 1):
+        value_down = method3(t1, t2, 1, w, p, lambda_poisson)
+        for n in range(1, 10000):
+            value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
+            if value_up - value_down <= utl_error:
+                if value_down -  max_utility > utl_error:
+                    max_utility = value_down
                     break
-                value_down = value_up
-            if t2_flag: break
-    return max_utility
+                else:
+                    return max_utility
+            value_down = value_up
 
+# utl_errorが0に近付けば近くほどutilityは正確になる(0.00001くらいでよい)
 @lru_cache(maxsize=None)
-def max_method3_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lambda_poison_error):
-    t2_flag = False
+def max_method3_with_error(w, p, p_error, lambda_poisson, lambda_poison_error, utl_error):
     max_utility = 0
     param_arr = np.array((0, 0, 0)) # [0] => T1, [1] => T2, [2] => n
-    T1_range = range(T1_start, T1_end)
-    for t1 in T1_range:
-        for t2 in range(1, t1 + 1):
-            value_down = method3(t1, t2, 1, w, p, lambda_poisson)
-            for n in range(1, 100000):
-                value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
-                if (value_up - value_down) <= 0:
-                    if value_down > max_utility:
-                        max_utility = value_down
-                        param_arr = np.array((t1, t2, 2 * n - 1))
-                    else:
-                        flag = True
+    t1 = max_method2_with_error(w, p, 0, lambda_poisson, 0)[1]
+    for t2 in range(1, t1 + 1):
+        value_down = method3(t1, t2, 1, w, p, lambda_poisson)
+        for n in range(1, 10000):
+            value_up = method3(t1, t2, 2 * n + 1, w, p, lambda_poisson)
+            if value_up - value_down <= utl_error:
+                if value_down - max_utility > utl_error:
+                    max_utility = value_down
+                    param_arr = np.array((t1, t2, 2 * n - 1))
                     break
-                value_down = value_up
-            if t2_flag: break
-    return method3(param_arr[0], param_arr[1], param_arr[2], w, p + p_error, lambda_poisson + lambda_poison_error)
+                else:
+                    return method3(param_arr[0], param_arr[1], param_arr[2], w, p + p_error, lambda_poisson + lambda_poison_error)
+            value_down = value_up
 
 @lru_cache(maxsize=None)
 def inc_and_dec_method3(T1, T2, w, p, lambda_poisson):
@@ -408,7 +381,7 @@ def plot_method_utility_with_p_error(w, predicted_p, predicted_lambda_poisson, l
     poll_priority_axis = [max_poll_priority_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
     vote_priority_axis = [max_vote_priority_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
     method2_axis = [max_method2_with_error(1, 50, w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
-#     method3_axis = [max_method3_with_error(15, 30, w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
+    method3_axis = [max_method3_with_error(15, 30, w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
     plt.title('method utility with p error w: {0} predicted_p: {1} predicted_lambda: {2} lambda_error: {3}'.format(w, predicted_p, predicted_lambda_poisson, lambda_poison_error))
     plt.xlabel('actual p')
     plt.ylabel('utility')
@@ -416,7 +389,7 @@ def plot_method_utility_with_p_error(w, predicted_p, predicted_lambda_poisson, l
     plt.plot(x_axis, poll_priority_axis, label="poll priority")
     plt.plot(x_axis, vote_priority_axis, label="vote priority")
     plt.plot(x_axis, method2_axis, label="method2")
-#     plt.plot(x_axis, method3_axis, label="method3")
+    plt.plot(x_axis, method3_axis, label="method3")
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
     plt.show()
 
