@@ -375,14 +375,14 @@ def plot_method4(T1, w, p, lambda_poisson, s_time, t_time):
 
 # 横軸 実際のp, 縦軸 utility
 @lru_cache(maxsize=None)
-def plot_method_utility_with_p_error(w, predicted_p, predicted_lambda_poisson, lambda_poison_error):
+def plot_method_utility_with_p_error(w, predicted_p, predicted_lambda_poisson, lambda_poison_error, utl_error):
     x_axis = np.linspace(0.51, 0.99, 49)
     time_priority_axis = [max_time_priority_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
     poll_priority_axis = [max_poll_priority_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
     vote_priority_axis = [max_vote_priority_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
-    method2_axis = [max_method2_with_error(1, 50, w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
-    method3_axis = [max_method3_with_error(15, 30, w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error) for p in x_axis]
-    plt.title('method utility with p error w: {0} predicted_p: {1} predicted_lambda: {2} lambda_error: {3}'.format(w, predicted_p, predicted_lambda_poisson, lambda_poison_error))
+    method2_axis = [max_method2_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error)[0] for p in x_axis]
+    method3_axis = [max_method3_with_error(w, predicted_p, p - predicted_p, predicted_lambda_poisson, lambda_poison_error, utl_error) for p in x_axis]
+    plt.title('method utility with p error w: {0} predicted_p: {1} predicted_lambda: {2} lambda_error: {3} utl_error: {4}'.format(w, predicted_p, predicted_lambda_poisson, lambda_poison_error, utl_error))
     plt.xlabel('actual p')
     plt.ylabel('utility')
     plt.plot(x_axis, time_priority_axis, label="time priority")
@@ -395,32 +395,32 @@ def plot_method_utility_with_p_error(w, predicted_p, predicted_lambda_poisson, l
 
 # 横軸 実際のlambda, 縦軸 utility
 @lru_cache(maxsize=None)
-def plot_method_utility_with_lambda_poisson_error(w, predicted_p, p_error, predicted_lambda_poisson):
-    x_axis = np.linspace(0, 5, 10)
+def plot_method_utility_with_lambda_poisson_error(w, predicted_p, p_error, predicted_lambda_poisson, utl_error):
+    x_axis = np.linspace(0, 1, 10)
     time_priority_axis = [max_time_priority_with_error(w, predicted_p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
     poll_priority_axis = [max_poll_priority_with_error(w, predicted_p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
     vote_priority_axis = [max_vote_priority_with_error(w, predicted_p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
-    method2_axis = [max_method2_with_error(1, 50, w, predicted_p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
-#     method3_axis = [max_method3_with_error(15, 30, w, p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson) for lambda_poisson in x_axis]
-    plt.title('method utility with lambda error w: {0} predicted_p: {1} p_error: {2} predicted_lambda: {3}'.format(w, predicted_p, p_error, predicted_lambda_poisson))
+    method2_axis = [max_method2_with_error(w, predicted_p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson)[0] for lambda_poisson in x_axis]
+    method3_axis = [max_method3_with_error(w, p, p_error, predicted_lambda_poisson, lambda_poisson - predicted_lambda_poisson, utl_error) for lambda_poisson in x_axis]
+    plt.title('method utility with lambda error w: {0} predicted_p: {1} p_error: {2} predicted_lambda: {3} utl_error: {4}'.format(w, predicted_p, p_error, predicted_lambda_poisson, utl_error))
     plt.xlabel('actual lambda')
     plt.ylabel('utility')
     plt.plot(x_axis, time_priority_axis, label="time priority")
     plt.plot(x_axis, poll_priority_axis, label="poll priority")
     plt.plot(x_axis, vote_priority_axis, label="vote priority")
     plt.plot(x_axis, method2_axis, label="method2")
-#     plt.plot(x_axis, method3_axis, label="method3")
+    plt.plot(x_axis, method3_axis, label="method3")
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
     plt.show()
 
 @lru_cache(maxsize=None)
-def plot_best_method(w, p_error, lambda_error):
+def plot_best_method(w, p_error, lambda_error, utl_error):
     color_list = []
-    lambda_range = np.linspace(1, 5, 8)
-    p_range = np.linspace(0.6, 0.9, 8)
+    lambda_range = np.linspace(0, 1, 2)
+    p_range = np.linspace(0.6, 0.9, 2)
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1)
-    ax.set_title('best method plot w: {0} p_error: {1} lambda_error: {2}'.format(w, p_error, lambda_error))
+    ax.set_title('best method plot w: {0} p_error: {1} lambda_error: {2} utl_error: {3}'.format(w, p_error, lambda_error, utl_error))
     ax.set_xlabel('predicted p')
     ax.set_ylabel('predicted lambda')
     for p_i in range(len(p_range)):
@@ -429,8 +429,8 @@ def plot_best_method(w, p_error, lambda_error):
                 "red": max_time_priority_with_error(w, p_range[p_i], p_error, lambda_range[l_i], lambda_error),
                 "yellow": max_poll_priority_with_error(w, p_range[p_i], p_error, lambda_range[l_i], lambda_error),
                 "blue": max_vote_priority_with_error(w, p_range[p_i], p_error, lambda_range[l_i], lambda_error),
-                "gray": max_method2_with_error(1, 30, w, p_range[p_i], p_error, lambda_range[l_i], lambda_error),
-                "black": max_method3_with_error(24, 26, w, p_range[p_i], p_error, lambda_range[l_i], lambda_error)
+                "gray": max_method2_with_error(w, p_range[p_i], p_error, lambda_range[l_i], lambda_error)[0],
+#                 "black": max_method3_with_error(w, p_range[p_i], p_error, lambda_range[l_i], lambda_error, utl_error)
             }
             ax.scatter(p_range[p_i], lambda_range[l_i], marker='s', s=150, c=max(max_utility_dict.items(), key=lambda x:x[1])[0], alpha=0.7)
     fig.show()
