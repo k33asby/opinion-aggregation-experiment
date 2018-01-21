@@ -146,6 +146,22 @@ def method2(T1, n, w, p, lambda_poisson):
     return not_stop_by_T1(T1, n, w, p, lambda_poisson) + stop_by_T1(T1, n, w, p, lambda_poisson)
 
 @lru_cache(maxsize=None)
+def max_method2_t1(w, p, lambda_poisson):
+    max_utility = 0
+    T1_range = range(1, 10000)
+    for t1 in T1_range:
+        value_down = method2(t1, 1, w, p, lambda_poisson)
+        for n in range(1, 100000):
+                value_up = method2(t1, 2 * n + 1, w, p, lambda_poisson)
+                if (value_up - value_down) <= 0:
+                    if value_down > max_utility:
+                        max_utility = value_down
+                        break
+                    else:
+                        return t1
+                value_down = value_up
+
+@lru_cache(maxsize=None)
 def max_method2(T1_start, T1_end, w, p, lambda_poisson):
     flag = False
     max_utility = 0
