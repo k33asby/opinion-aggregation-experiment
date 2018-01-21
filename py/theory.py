@@ -166,6 +166,7 @@ def max_method2(T1_start, T1_end, w, p, lambda_poisson):
 
 @lru_cache(maxsize=None)
 def max_method2_with_error(T1_start, T1_end, w, p, p_error, lambda_poisson, lambda_poison_error):
+    flag = False
     max_utility = 0
     param_arr = np.array((0, 0)) # [0] => T1, [1] => n
     T1_range = range(T1_start, T1_end)
