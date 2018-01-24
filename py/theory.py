@@ -38,7 +38,7 @@ def acc(n, p):
 @lru_cache(maxsize=None)
 def time_priority_method(t, w, p, lambda_poisson):
     if t == 0: return 0
-    return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in range(1, int(1.8 * t * lambda_poisson))) - w * t
+    return np.sum(poisson_probability(i, t, lambda_poisson) * acc(i, p) for i in range(0, int(1.8 * t * lambda_poisson))) - w * t
 
 @lru_cache(maxsize=None)
 def max_time_priority(w, p, lambda_poisson):
