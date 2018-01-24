@@ -123,15 +123,7 @@ def inc_and_dec_vote_priority_method(w, p, lambda_poisson):
     for k in range(1, 100000):
         diff = vote_priority_method(k + 1, w, p, lambda_poisson) - vote_priority_method(k, w, p, lambda_poisson)
         if diff < 0: return k
-
-@lru_cache(maxsize=None)
-def method1(t, w, p, lambda_poisson):
-    return time_priority_method(t, w, p, lambda_poisson)
-
-@lru_cache(maxsize=None)
-def inc_and_dec_method1(w, p, lambda_poisson):
-    return inc_and_dec_time_priority_method(w, p, lambda_poisson)
-
+        
 @lru_cache(maxsize=None)
 def not_stop_by_T1(T1, n, w, p, lambda_poisson):
     return np.sum(poisson_probability(i, T1, lambda_poisson) * (acc(i, p) - w * T1) for i in range(0, n))
@@ -329,16 +321,6 @@ def plot_vote_priority(w, p, lambda_poisson, s_time, t_time):
     y_axis = [vote_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
     plt.title('vote priority method weight: {0} person_probability: {1}'.format(w, p))
     plt.xlabel('require vote people')
-    plt.ylabel('utility')
-    plt.plot(x_axis, y_axis)
-    plt.show()
-
-@lru_cache(maxsize=None)
-def plot_method1(w, p, lambda_poisson, s_time, t_time):
-    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
-    y_axis = [time_priority_method(int(x), w, p, lambda_poisson) for x in x_axis]
-    plt.title('method1 weight: {0} person_probability: {1}'.format(w, p))
-    plt.xlabel('time')
     plt.ylabel('utility')
     plt.plot(x_axis, y_axis)
     plt.show()
