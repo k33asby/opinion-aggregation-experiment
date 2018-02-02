@@ -307,7 +307,7 @@ def plot_cumulative_poisson(time, lambda_poisson):
     x_axis = np.linspace(0, 2 * time * lambda_poisson, 2 * time * lambda_poisson + 1)
     y_axis = []
     for x in x_axis:
-        y_axis.append(self.model.cumulative_poisson_probability(int(x), time, lambda_poisson))
+        y_axis.append(cumulative_poisson_probability(int(x), time, lambda_poisson))
     plt.title('cumulative poisson time: {0} lambda: {1}'.format(time, lambda_poisson))
     plt.xlabel('n')
     plt.ylabel('probability')
