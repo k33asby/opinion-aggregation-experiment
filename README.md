@@ -1,9 +1,11 @@
 # 意見集約法の比較
 
 ## 概要
-研究で行なったシュミレーションのコードである。jupyter notebookを用いて実験を行なった。精度と時間のトレードオフ関係において最適な意見集約法を決定する。~~コードが荒れまくってるのでもう見たくもない。~~
+研究で行なったシュミレーションのコードである。jupyter notebookを用いて実験を行なった。精度と時間のトレードオフ関係において最適な意見集約法を決定する。~~コードが荒れまくってるのでもう見たくもない。~~    
+
 [Python3でLRUキャッシュを用いてプログラムを高速化
-](https://qiita.com/k33asby/items/4d471932e299edd08b24)
+](https://qiita.com/k33asby/items/4d471932e299edd08b24)    
+
 [Python3でポアソン分布、ガンマ分布](https://qiita.com/k33asby/items/cb5857c7d96dae6832c6)
 ## 主な構成
 * py/opinion-aggregation-experiment.ipynb
