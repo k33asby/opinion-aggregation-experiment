@@ -369,6 +369,23 @@ def plot_time_priority(w, p, lambda_poisson, s_time, t_time):
     plt.savefig("time_priority.png")
     plt.show()
 
+@lru_cache(maxsize=None)
+def plot_time_priority(s_time, t_time):
+    x_axis = np.linspace(s_time, t_time, t_time - s_time + 1)
+    y_axis_1 = [time_priority_method(int(x), 0.01, 0.6, 1) for x in x_axis]
+    y_axis_2 = [time_priority_method(int(x), 0.01, 0.9, 1) for x in x_axis]
+    y_axis_3 = [time_priority_method(int(x), 0.01, 0.6, 3) for x in x_axis]
+    y_axis_4 = [time_priority_method(int(x), 0.005, 0.6, 1) for x in x_axis]
+    plt.title('time priority method weight: {0}'.format(w))
+    plt.xlabel('time')
+    plt.ylabel('utility')
+    plt.plot(x_axis, y_axis_1, label="w = 0.01, p = 0.6, lambda = 1")
+    plt.plot(x_axis, y_axis_2, label="w = 0.01, p = 0.9, lambda = 1")
+    plt.plot(x_axis, y_axis_3, label="w = 0.01, p = 0.6, lambda = 3")
+    plt.plot(x_axis, y_axis_4, label="w = 0.005, p = 0.6, lambda = 1")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+    plt.show()
+
 # 投票数優先意見集約法をプロットする
 # x軸:投票数, y軸:効用
 @lru_cache(maxsize=None)
