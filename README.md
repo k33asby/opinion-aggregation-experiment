@@ -15,7 +15,8 @@ py/opinion-aggregation-experiment.ipynbの元となる理論のファイル
 こちらでは理論ではなく実際に何度も試行を繰り返すことによって数値を得ている
 
 ## 一部の結果
-こんな感じのものを出力した。
-<img src="https://user-images.githubusercontent.com/31947384/36298766-0db7d2f6-133d-11e8-909b-700693dfd76a.png" width="70%">
+こんな感じのものを出力した。         
+
+<img src="https://user-images.githubusercontent.com/31947384/36298766-0db7d2f6-133d-11e8-909b-700693dfd76a.png" width="70%">          
 
 <img src="https://user-images.githubusercontent.com/31947384/36298751-ffa832aa-133c-11e8-8f46-a50c39ac40f3.png" width="70%">
